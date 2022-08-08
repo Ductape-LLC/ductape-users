@@ -5,7 +5,7 @@ import router from './commons/routesConfig';
 import cors from 'cors';
 
 const app = express();
-const port = 8002;
+const port = process.env.PORT || 8002;
 
 dotEnv.config();
 // Bodyparser
