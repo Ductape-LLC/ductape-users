@@ -112,4 +112,22 @@ router.post(
   }
 )
 
+router.get(
+  "/users/email",
+  validateModuleRequest,
+  async (req:Request, res: Response, next: NextFunction) => {
+    try{
+      const { query } = req;
+      const { email } = query;
+
+      if(!email) return res.status(400).json(ERROR("email is required"))
+
+      const result = await usersService.findByEmail(email as unknown as string);
+      return res.status(200).json(SUCCESS(result))
+
+    } catch (e) {const error = extractError(e as unknown as genericErrors);
+      return res.status(500).json(ERROR(error.toString()))
+    }
+  }
+)
 export default router;
