@@ -4,6 +4,7 @@
   "description": "action-reaction api integration framework",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon ./src/app.ts",
     "serve": "nodemon ./src/app.ts",
     "build": "tsc --project ./ || true",
     "test": "echo \"Error: no test specified\" && exit 1"
