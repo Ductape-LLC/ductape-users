@@ -16,6 +16,7 @@ export const sendConfirmationEmail = async (payload: confirmUserEmailEvent) => {
     }
 }
 
+
 export const sendForgotEmail = async (payload: forgotUserEmailEvent) => {
     try {
         const {user, forgot_id, token, auth} = payload;

@@ -13,3 +13,5 @@ export interface confirmUser {
 export interface confirmUserEmailEvent { user: users, confirm_id: ObjectId, token: string, auth: string }
 
 export interface forgotUserEmailEvent { user: users, forgot_id: ObjectId, token: string, auth: string }
+
+export interface findUserByEmailAndUpdateIdEvent { email: string, user_id: ObjectId, auth: string }
