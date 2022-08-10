@@ -13,6 +13,7 @@ export interface IUsersService {
     loginUserAccount(payload: Partial<users>): Promise<users>;
     confirmUserAccount(token: string, confirm_id: ObjectId): Promise<boolean>;
     validatePublicKeyJWT(token: string, user_id: ObjectId, public_key: string): Promise<unknown>;
+    findByEmailAndUpdate(email:string, set: Partial<users>): Promise<boolean>;
 }
 
 export default class UsersService implements IUsersService {
@@ -33,7 +34,10 @@ export default class UsersService implements IUsersService {
 
         const confirm = await this.ConfirmRepo.create(user);
         const {_id: confirm_id, token} = confirm;
+        const {_id: user_id, email} = user;
         const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('2m')}`
+
+        EVENTBROKER({event: EventType.FIND_EMAIL_AND_UPDATE_USER_ID, data:{ auth, email, user_id}})
 
         EVENTBROKER({event: EventType.CONFIRM_EMAIL, data: {user, token, confirm_id, auth} })
         return user;
@@ -108,5 +112,9 @@ export default class UsersService implements IUsersService {
 
     async findByEmail(email: string): Promise<users> {
         return await this.UserRepo.fetchByEmail(email); 
+    }
+
+    async findByEmailAndUpdate(email:string, set: Partial<users>): Promise<boolean> {
+        return await this.UserRepo.fetchByEmailAndUpdate(email, set);
     }
 }

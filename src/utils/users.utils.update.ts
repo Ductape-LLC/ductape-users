@@ -13,6 +13,17 @@ export const updateUser =async (id: unknown, set: Partial<users>): Promise<boole
     }
 }
 
+export const updateUserByEmail =async (email: unknown, set: Partial<users>): Promise<boolean> => {
+    try{
+        const update = await model.findOneAndUpdate(email, {$set: {...set}});
+
+        if(update) return true;
+        return false;
+    } catch(e){
+        throw e;
+    }
+}
+
 export const updateMultipleUsers =async (get: object, set: Partial<users>): Promise<boolean> => {
     try{
         const update = await model.updateMany(get, {$set: {...set}});

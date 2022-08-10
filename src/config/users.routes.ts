@@ -23,6 +23,8 @@ router.post(
       if (error) return res.status(400).json(ERROR(error))
 
       const result = await usersService.createUserAccount(body);
+      const  {_id: user_id} = result
+
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
       const error = extractError(e as unknown as genericErrors);
@@ -130,4 +132,5 @@ router.get(
     }
   }
 )
+
 export default router;

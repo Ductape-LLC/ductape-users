@@ -1,7 +1,7 @@
 import { cleanUserData, fetchUser, fetchUserById, generatePublicKey } from "../utils/users.utils.read";
 import { users } from "../types/users.type"
 import { createUsers } from "../utils/users.utils.create";
-import { updateUser, updateMultipleUsers } from "../utils/users.utils.update";
+import { updateUser, updateUserByEmail, updateMultipleUsers } from "../utils/users.utils.update";
 import { sha256 } from "../utils/users.utils.string";
 import { ObjectId } from "mongoose";
 
@@ -13,6 +13,7 @@ export interface IUsersRepo {
     fetchById(get: unknown): Promise<users>;
     fetchByEmail(email: string): Promise<users>;
     fetchByIdReturnPrivateKey(id: ObjectId): Promise<users>;
+    fetchByEmailAndUpdate(email: string, set: Partial<users>): Promise<boolean>
 }
 
 export const UsersRepo: IUsersRepo = {
@@ -73,6 +74,12 @@ export const UsersRepo: IUsersRepo = {
 
         return user;
     },
+
+    async fetchByEmailAndUpdate(email: string, set: Partial<users>): Promise<boolean> {
+        return await updateUserByEmail(email, set);
+    },
+
+
 
     async fetchById(id: ObjectId): Promise<users> {
         try {
