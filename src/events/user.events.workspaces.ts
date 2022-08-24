@@ -8,7 +8,9 @@ export const workspaceClient = (auth: string)=>{
 
 export const findByEmailAndUpdateId = async (payload: findUserByEmailAndUpdateIdEvent) => {
     try {
-        const { email, user_id, auth } = payload;
+        // const { user, auth } = payload;
+        const {user_id, email, public_key, auth} = payload;
+
 
         return await workspaceClient(auth).post(FIND_EMAIL_AND_AND_UPDATE_USER_ID, {email, user_id});
 

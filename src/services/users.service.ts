@@ -37,7 +37,7 @@ export default class UsersService implements IUsersService {
         const {_id: user_id, email} = user;
         const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('2m')}`
 
-        EVENTBROKER({event: EventType.FIND_EMAIL_AND_UPDATE_USER_ID, data:{ auth, email, user_id}})
+        EVENTBROKER({event: EventType.FIND_EMAIL_AND_UPDATE_USER_ID, data:{ auth, user_id, email, user}})
 
         EVENTBROKER({event: EventType.CONFIRM_EMAIL, data: {user, token, confirm_id, auth} })
         return user;

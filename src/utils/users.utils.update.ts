@@ -13,7 +13,7 @@ export const updateUser =async (id: unknown, set: Partial<users>): Promise<boole
     }
 }
 
-export const updateUserByEmail =async (email: unknown, set: Partial<users>): Promise<boolean> => {
+export const updateUserByEmail =async (email: any, set: Partial<users>): Promise<boolean> => {
     try{
         const update = await model.findOneAndUpdate(email, {$set: {...set}});
 
