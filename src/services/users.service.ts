@@ -44,7 +44,7 @@ export default class UsersService implements IUsersService {
 
        const {private_key} = userData;
        delete userData.private_key;
-       const auth_token = await this.AuthRepo.generateUserAuthJWT(userData, private_key as string, '7h');
+       const auth_token = await this.AuthRepo.generateUserAuthJWT(userData, private_key as string, '100y');
 
        return {...userData, auth_token }
    }

@@ -12,7 +12,7 @@ dotEnv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = ['http://localhost:3000'];
+const allowedOrigins = ['http://localhost:3000','*'];
 
 const options: cors.CorsOptions = {
   origin: allowedOrigins
