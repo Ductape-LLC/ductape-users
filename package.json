@@ -4,6 +4,7 @@
   "description": "action-reaction api integration framework",
   "main": "index.js",
   "scripts": {
+    "start:prod": "tsc && node build/src/app.js",
     "start": "nodemon ./src/app.ts",
     "serve": "nodemon ./src/app.ts",
     "build": "tsc --project ./ || true",

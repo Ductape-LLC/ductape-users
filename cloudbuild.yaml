@@ -1,0 +1,19 @@
+ # Build the container image
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['build', '-t', 'gcr.io/$PROJECT_ID/ductape-apps:$COMMIT_SHA', '.']
+ # Push the container image to Container Registry
+ - name: 'gcr.io/cloud-builders/docker'
+   args: ['push', 'gcr.io/$PROJECT_ID/ductape-apps:$COMMIT_SHA']
+ # Deploy container image to Cloud Run
+ - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+   entrypoint: gcloud
+   args:
+   - 'run'
+   - 'deploy'
+   - 'ductape-apps'
+   - '--image'
+   - 'gcr.io/$PROJECT_ID/ductape-apps:$COMMIT_SHA'
+   - '--region'
+   - 'europe-southwest1-a'
+ images:
+ - 'gcr.io/$PROJECT_ID/ductape-apps:$COMMIT_SHA
