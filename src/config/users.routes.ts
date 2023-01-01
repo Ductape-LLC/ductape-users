@@ -19,8 +19,7 @@ router.post(
     try {
       const { body } = req;
 
-      const { error } = await UserSchema.validateAsync(body);
-      if (error) return res.status(400).json(ERROR(error))
+      await UserSchema.validateAsync(body);
 
       const result = await usersService.createUserAccount(body);
       return res.status(201).json(SUCCESS(result));
@@ -37,8 +36,7 @@ router.post(
     try {
       const { body } = req;
 
-      const { error } = await LoginSchema.validateAsync(body);
-      if (error) return res.status(400).json(ERROR(error))
+      await LoginSchema.validateAsync(body);
 
       const result = await usersService.loginUserAccount(body);
       console.log("SUCCESSS!!!!", result);
@@ -57,8 +55,7 @@ router.post(
     try {
       const { body } = req;
 
-      const { error } = await ForgotSchema.validateAsync(body);
-      if (error) return res.status(400).json(ERROR(error));
+      await ForgotSchema.validateAsync(body);
 
       const { email } = body;
 
