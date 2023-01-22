@@ -14,6 +14,7 @@ export interface users {
     auth_token?: string;
     active: boolean;
     workspaces?: Array<any>;
+    permissions?: Array<string>;
 };
 
 export interface genericErrors { code?: number, _original: unknown, details: [{ message: string }] }

@@ -109,4 +109,9 @@ export default class UsersService implements IUsersService {
     async findByEmail(email: string): Promise<users> {
         return await this.UserRepo.fetchByEmail(email); 
     }
+
+
+    async findByUserId(id: string): Promise<users> {
+        return await this.UserRepo.fetchById(id)
+    }
 }

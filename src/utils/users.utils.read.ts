@@ -19,7 +19,7 @@ export const fetchUserById = async (id: ObjectId): Promise<users> => {
     try{
         const users = await model.findById(id);
 
-        if(users) return users;
+        if(users) return users.toObject();
 
         throw "User not founder";
     } catch(e) {
