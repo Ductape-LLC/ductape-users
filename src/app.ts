@@ -12,7 +12,7 @@ dotEnv.config();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = ['http://localhost:3000','https://ductape-frontend.vercel.app','https://ductape-frontend.vercel.app',];
+const allowedOrigins = ['http://localhost:3000','https://ductape-frontend-5jdc.vercel.app','https://ductape-frontend.vercel.app',];
 
 const options: cors.CorsOptions = {
   origin: allowedOrigins
