@@ -9,6 +9,10 @@ const schema = new mongoose.Schema<users>({
     lastname: {type: String},
     email: {type: String, unique: true},
     password: {type: String},
+    otp: {
+        otp_type: {type: String},
+        active: {type: Boolean, 'default': false}
+    },
     dp: {type: String},
     bio: {type: String},
     // @ts-ignore

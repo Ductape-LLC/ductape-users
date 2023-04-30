@@ -3,10 +3,13 @@ import { confirmUser as forgotUser } from "../types/confirm.type";
 import { users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { fetchForgot } from "../utils/forgot.utils.read";
+import { updateForgot } from "../utils/forgot.utils.update";
 
 export interface IForgotRepo {
     create(user: users): Promise<forgotUser>;
     fetch(get: Partial<forgotUser>): Promise<forgotUser>;
+    fetchByUser(get: Partial<forgotUser>): Promise<forgotUser>;
+    updateOne(id: unknown, set: Partial<forgotUser>): Promise<boolean>;
 };
 
 export const ForgotRepo: IForgotRepo = {
@@ -31,5 +34,28 @@ export const ForgotRepo: IForgotRepo = {
         } catch (e) {
             throw e;
         }
-    }
+    },
+
+    async fetchByUser(get: Partial<forgotUser>): Promise<forgotUser> {
+
+        try{
+            const {token, user_id} = get;
+
+            return await fetchForgot([{
+                $match: {
+                    token,
+                    user_id
+                }
+            }]);
+        } catch (e) {
+            throw e;
+        }
+    },
+    async updateOne(id: any, set: Partial<forgotUser>): Promise<boolean> {
+        try {
+            return await updateForgot(id, set);
+        } catch (e) {
+            throw e;
+        }
+    },
 }

@@ -1,6 +1,6 @@
-import { SEND_CONFIRM_EMAIL, SEND_FORGOT_EMAIL } from "../constants/user.constants.urls";
+import { SEND_CONFIRM_EMAIL, SEND_FORGOT_EMAIL, SEND_OTP_EMAIL } from "../constants/user.constants.urls";
 import client from "../clients/axios";
-import { confirmUserEmailEvent, forgotUserEmailEvent } from "../types/confirm.type";
+import { confirmUserEmailEvent, forgotUserEmailEvent, sendOTPEmailEvent } from "../types/confirm.type";
 export const emailClient = (auth: string)=>{
     return client(process.env.EMAIL_SERVICE as string, auth, "application/json")
 }
@@ -22,6 +22,20 @@ export const sendForgotEmail = async (payload: forgotUserEmailEvent) => {
         const {firstname, lastname, email, public_key} = user;
 
         return await emailClient(auth).post(SEND_FORGOT_EMAIL, {firstname, lastname, email, forgot_id, token});
+    } catch(e) {
+        console.log(e);
+    }
+}
+
+export const sendOTPEmail = async (payload: sendOTPEmailEvent) => {
+    try {
+
+        const {user, otp_id, token, auth} = payload;
+
+        const {firstname, lastname,email, public_key} = user;
+
+        return await emailClient(auth).post(SEND_OTP_EMAIL, {firstname, lastname, email, otp_id, token});
+
     } catch(e) {
         console.log(e);
     }

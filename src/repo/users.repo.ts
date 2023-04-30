@@ -96,9 +96,20 @@ export const UsersRepo: IUsersRepo = {
 
     async fetchByIdReturnPrivateKey(id: ObjectId): Promise<users> {
         try {
-            const userData = await fetchUserById(id);
+            const userData = await fetchUser([{
+                $match: {
+                    _id: new mongoose.Types.ObjectId(String(id))
+                }
+            }, {
+                $lookup: {
+                    from: "workspace_accesses",
+                    foreignField: "user_id",
+                    localField: "_id",
+                    as: "workspaces"
+                }
+            }]);
             const {private_key} = userData;
-            console.log("PEEEKEY", private_key);
+            console.log("PEEEKEY", private_key, userData);
             return {...userData, public_key: generatePublicKey(private_key as string), private_key}
         } catch (e) {
             throw e;
