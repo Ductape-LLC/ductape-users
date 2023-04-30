@@ -12,7 +12,7 @@ export const sendConfirmationEmail = async (payload: confirmUserEmailEvent) => {
 
         return await emailClient(auth).post(SEND_CONFIRM_EMAIL, {firstname, lastname, email, confirm_id, token});
     } catch(e) {
-        console.log(e);
+        if(process.env.NODE_ENV !== "production") console.log(e);
     }
 }
 
@@ -23,7 +23,7 @@ export const sendForgotEmail = async (payload: forgotUserEmailEvent) => {
 
         return await emailClient(auth).post(SEND_FORGOT_EMAIL, {firstname, lastname, email, forgot_id, token});
     } catch(e) {
-        console.log(e);
+        if(process.env.NODE_ENV !== "production") console.log(e);
     }
 }
 
@@ -37,6 +37,6 @@ export const sendOTPEmail = async (payload: sendOTPEmailEvent) => {
         return await emailClient(auth).post(SEND_OTP_EMAIL, {firstname, lastname, email, otp_id, token});
 
     } catch(e) {
-        console.log(e);
+        if(process.env.NODE_ENV !== "production") console.log(e);
     }
 }

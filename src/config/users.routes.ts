@@ -43,10 +43,10 @@ router.post(
       await LoginSchema.validateAsync(body);
 
       const result = await usersService.loginUserAccount(body);
-      console.log("SUCCESSS!!!!", result);
+      if(process.env.NODE_ENV !== "production") console.log("SUCCESSS!!!!", result);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      console.log("EERRRROOORRR!!!!", e);
+      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       const error = extractError(e as unknown as genericErrors);
       return res.status(500).json(ERROR(error));
     }
@@ -69,7 +69,7 @@ router.put(
       return res.status(201).json(SUCCESS(result));
 
     } catch(e) {
-      console.log("EERRRROOORRR!!!!", e);
+      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       const error = extractError(e as unknown as genericErrors);
       return res.status(500).json(ERROR(error));
     }
@@ -92,7 +92,7 @@ router.post(
       return res.status(201).json(SUCCESS(result));
 
     } catch(e) {
-      console.log("EERRRROOORRR!!!!", e);
+      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       const error = extractError(e as unknown as genericErrors);
       return res.status(500).json(ERROR(error));
     }
@@ -112,7 +112,7 @@ router.post(
       return res.status(201).json(SUCCESS(result));
 
     } catch(e) {
-      console.log("ERRRORRRRRR!!!!",e);
+      if(process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!",e);
       const error = extractError(e as unknown as genericErrors);
       return res.status(500).json(ERROR(error));
     }
@@ -142,7 +142,7 @@ router.get("/me", async (req: Request, res: Response, next: NextFunction) => {
     return res.status(201).json(SUCCESS(await usersService.findByUserId(user_id)));
 
   } catch (e) {
-    console.log("EERRRROOORRR!!!!", e);
+    if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
     const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error));
   }

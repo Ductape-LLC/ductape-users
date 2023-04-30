@@ -109,7 +109,7 @@ export const UsersRepo: IUsersRepo = {
                 }
             }]);
             const {private_key} = userData;
-            console.log("PEEEKEY", private_key, userData);
+            if(process.env.NODE_ENV !== "production") console.log("PEEEKEY", private_key, userData);
             return {...userData, public_key: generatePublicKey(private_key as string), private_key}
         } catch (e) {
             throw e;

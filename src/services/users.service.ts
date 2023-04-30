@@ -95,7 +95,7 @@ export default class UsersService implements IUsersService {
 
                     if (new Date(expiry) < new Date() || status) throw "OTP has expired";
 
-                    // console.log("PRIVATES!!!!",private_key)
+                    // if(process.env.NODE_ENV !== "production") console.log("PRIVATES!!!!",private_key)
 
                     const auth_token = await this.AuthRepo.generateUserAuthJWT(user, private_key as string, '100y');
 
@@ -175,7 +175,7 @@ export default class UsersService implements IUsersService {
             const { token, _id } = forgot;
             const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('100y')}`
 
-            console.log("event broker init");
+            if(process.env.NODE_ENV !== "production") console.log("event broker init");
             EVENTBROKER({ event: EventType.FORGOT_EMAIL, data: { user, token, forgot_id: _id, auth } });
 
             return true;
@@ -218,8 +218,6 @@ export default class UsersService implements IUsersService {
             const { public_key: p_key, private_key } = data;
             if (p_key !== public_key) throw "Invalid key access";
 
-            console.log("TOKEN!", token);
-            console.log("PRIVATE KEY!!!", private_key);
             return await this.AuthRepo.validateUserAuthJWT(token, private_key as string);
         } catch (e) {
             throw e;
