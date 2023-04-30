@@ -22,13 +22,13 @@ app.use(cors(options));
 
 app.use(router);
 mongoose.connect(process.env.DB_HOST as string).catch((e) => {
-  console.log(e);
+  if(process.env.NODE_ENV !== "production") console.log(e);
 });
 
 mongoose.connection.on('open', () => {
-  console.log('Mongoose Connection');
+  if(process.env.NODE_ENV !== "production") console.log('Mongoose Connection');
 });
 
 app.listen(port, () => {
-  console.log(`ductape-users-api app is running on port ${port}.`);
+  if(process.env.NODE_ENV !== "production") console.log(`ductape-users-api app is running on port ${port}.`);
 });

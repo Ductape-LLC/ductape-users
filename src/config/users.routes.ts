@@ -3,7 +3,9 @@ import UsersService from "../services/users.service";
 import SUCCESS from "../commons/successResponse";
 import ERROR from "../commons/errorResponse";
 import UserSchema from "../validators/users.validator.create";
+import ChangePasswordSchema from "../validators/users.validator.changepassword";
 import LoginSchema from "../validators/users.validator.login";
+import OTPLoginSchema from "../validators/users.validator.otplogin";
 import ForgotSchema from "../validators/users.validators.forgotpassword";
 import { extractError, stripAuth } from "../utils/users.utils.string";
 import { genericErrors } from "../types/users.type";
@@ -13,6 +15,7 @@ import { validateModuleRequest } from "../middleware/users.middleware.modules";
 const router = Router();
 const usersService = new UsersService();
 
+// create new user
 router.post(
   "/create",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -30,6 +33,7 @@ router.post(
   }
 );
 
+// login
 router.post(
   "/login",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -39,17 +43,84 @@ router.post(
       await LoginSchema.validateAsync(body);
 
       const result = await usersService.loginUserAccount(body);
-      console.log("SUCCESSS!!!!", result);
+      if(process.env.NODE_ENV !== "production") console.log("SUCCESSS!!!!", result);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      console.log("EERRRROOORRR!!!!", e);
+      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       const error = extractError(e as unknown as genericErrors);
       return res.status(500).json(ERROR(error));
     }
   }
 );
 
+// change password
+router.put(
+  "/password",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
 
+      const { body } = req;
+
+      await ChangePasswordSchema.validateAsync(body);
+      const { token, email, password } = body;
+
+      const result = await usersService.changePassword(token, email, password );
+
+      return res.status(201).json(SUCCESS(result));
+
+    } catch(e) {
+      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(500).json(ERROR(error));
+    }
+  }
+)
+
+// login with otp
+router.post(
+  "/login/otp",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+      const { body } = req;
+
+      await OTPLoginSchema.validateAsync(body);
+      const { token, user_id } = body;
+
+      const result = await usersService.otpLogin(token, user_id as unknown as ObjectId);
+
+      return res.status(201).json(SUCCESS(result));
+
+    } catch(e) {
+      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(500).json(ERROR(error));
+    }
+  }
+)
+
+// request new email otp
+router.post(
+  "/otp/:user_id", 
+  async(req: Request, res: Response, next: NextFunction) => {
+    try {
+
+      const {params} = req;
+      const {user_id} = params;
+
+      const result = await usersService.regenerateLoginOTP(user_id as unknown as ObjectId);
+      return res.status(201).json(SUCCESS(result));
+
+    } catch(e) {
+      if(process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!",e);
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(500).json(ERROR(error));
+    }
+  }
+)
+
+
+// fetch information of token holder
 router.get("/me", async (req: Request, res: Response, next: NextFunction) => {
 
   try {
@@ -71,13 +142,14 @@ router.get("/me", async (req: Request, res: Response, next: NextFunction) => {
     return res.status(201).json(SUCCESS(await usersService.findByUserId(user_id)));
 
   } catch (e) {
-    console.log("EERRRROOORRR!!!!", e);
+    if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
     const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error));
   }
 
 });
 
+// process forgot password
 router.post(
   "/forgot",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -97,6 +169,7 @@ router.post(
   }
 );
 
+// confirm user endpoint
 router.get(
   "/confirm/:confirm_id/:token",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -118,6 +191,7 @@ router.get(
   }
 )
 
+// validate other domains access
 router.post(
   "/validate/access",
   validateModuleRequest,
@@ -138,6 +212,7 @@ router.post(
   }
 )
 
+// validate module request
 router.get(
   "/users/email",
   validateModuleRequest,
