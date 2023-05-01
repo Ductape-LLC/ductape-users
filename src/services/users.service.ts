@@ -63,7 +63,7 @@ export default class UsersService implements IUsersService {
             } else {
 
                 if (otp_type === otp_types.EMAIL) {
-                    const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('2m')}`;
+                    const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('100y')}`;
                     const otp = await this.OTPRepo.create(userData);
                     const { _id: otp_id, token } = otp;
                     EVENTBROKER({ event: EventType.SEND_OTP, data: { user: userData, token, otp_id, auth } })
