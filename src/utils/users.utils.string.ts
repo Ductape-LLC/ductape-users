@@ -39,6 +39,13 @@ export const generateConfirmationExpiry = (): Date => {
     return dt;
 }
 
+export const generateOTPExpiry = (): Date => {
+    const dt = new Date();
+    dt.setMinutes( dt.getMinutes() + 5 );
+
+    return dt;
+}
+
 export const stripAuth = (token: string) => {
     if (token.startsWith("Bearer ")) token = token.slice(7, token.length);
 
