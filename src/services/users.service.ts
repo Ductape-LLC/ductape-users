@@ -9,6 +9,7 @@ import { confirmUser } from "../types/confirm.type";
 import { ForgotRepo, IForgotRepo } from "../repo/forgot.repo";
 import { IOTPRepo, OTPRepo } from "../repo/otp.repo";
 import sha256 from "crypto-js/sha256";
+import { handleError } from "../errors/errors";
 
 export interface IUsersService {
     createUserAccount(payload: users): Promise<users>;
@@ -71,7 +72,7 @@ export default class UsersService implements IUsersService {
                 return { ...userData };
             }
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 
@@ -115,7 +116,7 @@ export default class UsersService implements IUsersService {
             }
 
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
 
     }
@@ -136,7 +137,7 @@ export default class UsersService implements IUsersService {
 
 
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 
@@ -160,7 +161,7 @@ export default class UsersService implements IUsersService {
 
             return true;
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 
@@ -180,7 +181,7 @@ export default class UsersService implements IUsersService {
 
             return true;
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 
@@ -208,7 +209,7 @@ export default class UsersService implements IUsersService {
             return true;
 
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 
@@ -220,7 +221,7 @@ export default class UsersService implements IUsersService {
 
             return await this.AuthRepo.validateUserAuthJWT(token, private_key as string);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 

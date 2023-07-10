@@ -1,6 +1,7 @@
 import { PipelineStage } from "mongoose";
 import { model } from "../models/forgot.model";
 import { confirmUser as forgotUser } from "../types/confirm.type";
+import { handleError } from "../errors/errors";
 
 export const fetchForgot = async (get: PipelineStage[]): Promise<forgotUser> => {
     try{
@@ -10,6 +11,6 @@ export const fetchForgot = async (get: PipelineStage[]): Promise<forgotUser> => 
 
         return data[0];
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }

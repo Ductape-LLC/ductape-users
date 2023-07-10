@@ -1,6 +1,7 @@
 import { PipelineStage } from "mongoose";
 import { model } from "../models/otp.model";
 import { confirmUser as otpUser } from "../types/confirm.type";
+import { handleError } from "../errors/errors";
 
 export const updateOTP =async (id: unknown, set: Partial<otpUser>): Promise<boolean> => {
     try{
@@ -9,7 +10,7 @@ export const updateOTP =async (id: unknown, set: Partial<otpUser>): Promise<bool
         if(update) return true;
         return false;
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }
 
@@ -20,6 +21,6 @@ export const updateMultipleOTP =async (get: object, set: Partial<otpUser>): Prom
         if(update) return true;
         return false;
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }

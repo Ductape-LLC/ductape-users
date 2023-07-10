@@ -1,6 +1,7 @@
 import { PipelineStage } from "mongoose";
 import { model } from "../models/otp.model";
 import { confirmUser as otpUser } from "../types/confirm.type";
+import { handleError } from "../errors/errors";
 
 export const fetchOTP = async (get: PipelineStage[]): Promise<otpUser> => {
     try{
@@ -10,6 +11,6 @@ export const fetchOTP = async (get: PipelineStage[]): Promise<otpUser> => {
 
         return data[0];
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }

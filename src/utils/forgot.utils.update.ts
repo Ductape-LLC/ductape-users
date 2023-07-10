@@ -1,6 +1,7 @@
 import { PipelineStage } from "mongoose";
 import { model } from "../models/forgot.model";
 import { confirmUser as forgotUser } from "../types/confirm.type";
+import { handleError } from "../errors/errors";
 
 export const updateForgot =async (id: unknown, set: Partial<forgotUser>): Promise<boolean> => {
     try{
@@ -9,7 +10,7 @@ export const updateForgot =async (id: unknown, set: Partial<forgotUser>): Promis
         if(update) return true;
         return false;
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }
 
@@ -20,6 +21,6 @@ export const updateMultipleForgot =async (get: object, set: Partial<forgotUser>)
         if(update) return true;
         return false;
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }

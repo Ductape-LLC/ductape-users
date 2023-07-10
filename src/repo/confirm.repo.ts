@@ -3,6 +3,7 @@ import { confirmUser } from "../types/confirm.type";
 import { users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { fetchConfirm } from "../utils/confirm.utils.read";
+import { handleError } from "../errors/errors";
 
 export interface IConfirmRepo {
     create(user: users): Promise<confirmUser>;
@@ -29,7 +30,7 @@ export const ConfirmRepo: IConfirmRepo = {
                 }
             }]);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 }

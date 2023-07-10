@@ -1,5 +1,6 @@
 import JWT from "jsonwebtoken";
 import { users } from "../types/users.type";
+import { handleError } from "../errors/errors";
 
 export interface IAuthRepo {
     generateModuleAuthJWT(time: string): Promise<string>;
@@ -16,7 +17,7 @@ export const AuthRepo: IAuthRepo = {
         try {
             return JWT.verify(jwt, process.env.ENC_KEY as string);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
 
@@ -28,7 +29,7 @@ export const AuthRepo: IAuthRepo = {
         try{
             return JWT.verify(jwt, private_key);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 };

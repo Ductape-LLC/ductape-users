@@ -27,8 +27,7 @@ router.post(
       const result = await usersService.createUserAccount(body);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error));
+      next();
     }
   }
 );
@@ -47,8 +46,7 @@ router.post(
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
       if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error));
+      next();
     }
   }
 );
@@ -70,8 +68,7 @@ router.put(
 
     } catch(e) {
       if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error));
+      next();
     }
   }
 )
@@ -93,8 +90,7 @@ router.post(
 
     } catch(e) {
       if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error));
+      next();
     }
   }
 )
@@ -113,8 +109,7 @@ router.post(
 
     } catch(e) {
       if(process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!",e);
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error));
+      next();
     }
   }
 )
@@ -143,8 +138,7 @@ router.get("/me", async (req: Request, res: Response, next: NextFunction) => {
 
   } catch (e) {
     if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-    const error = extractError(e as unknown as genericErrors);
-    return res.status(500).json(ERROR(error));
+    next();
   }
 
 });
@@ -163,8 +157,7 @@ router.post(
       const result = await usersService.generateResetUserPassword(email);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error));
+      next();
     }
   }
 );
@@ -185,8 +178,7 @@ router.get(
       }
 
     } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error))
+      next();
     }
   }
 )
@@ -206,8 +198,7 @@ router.post(
       return res.status(200).json(SUCCESS(result))
 
     } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error.toString()))
+      next();
     }
   }
 )
@@ -227,8 +218,7 @@ router.get(
       return res.status(200).json(SUCCESS(result))
 
     } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(500).json(ERROR(error.toString()))
+      next();
     }
   }
 )
