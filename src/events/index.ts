@@ -1,3 +1,4 @@
+import { handleError } from "../errors/errors";
 import { confirmUserEmailEvent, forgotUserEmailEvent, sendOTPEmailEvent } from "../types/confirm.type";
 import { sendConfirmationEmail, sendForgotEmail, sendOTPEmail } from "./user.events.emails";
 import { EventRequest, EventType } from "./user.events.types";
@@ -18,7 +19,7 @@ const EVENTBROKER = async (eventRequest: EventRequest): Promise<any> => {
                 throw `${event} not handled`;
         }
     } catch (e) {
-        throw e;
+        throw handleError(e);
     }
 }
 

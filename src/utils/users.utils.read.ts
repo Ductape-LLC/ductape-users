@@ -2,6 +2,7 @@ import { ObjectId, PipelineStage } from "mongoose";
 import { model } from "../models/users.model";
 import { users } from "../types/users.type";
 import crypto from "crypto";
+import { handleError } from "../errors/errors";
 
 export const fetchUser =async (get: PipelineStage[]): Promise<users> => {
     try{
@@ -11,7 +12,7 @@ export const fetchUser =async (get: PipelineStage[]): Promise<users> => {
 
         return data[0]
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }
 

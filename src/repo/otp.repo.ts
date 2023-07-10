@@ -4,6 +4,7 @@ import { users } from "../types/users.type";
 import mongoose, { ObjectId } from "mongoose";
 import { fetchOTP } from "../utils/otp.utils.read";
 import { updateOTP } from "../utils/otp.utils.update";
+import { handleError } from "../errors/errors";
 
 export interface IOTPRepo {
     create(user: users): Promise<otpUser>;
@@ -32,7 +33,7 @@ export const OTPRepo: IOTPRepo = {
                 }
             }]);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
 
@@ -48,7 +49,7 @@ export const OTPRepo: IOTPRepo = {
                 }
             }]);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
 
@@ -56,7 +57,7 @@ export const OTPRepo: IOTPRepo = {
         try {
             return await updateOTP(id, set);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
 }

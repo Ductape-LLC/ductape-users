@@ -4,6 +4,7 @@ import { createUsers } from "../utils/users.utils.create";
 import { updateUser, updateMultipleUsers } from "../utils/users.utils.update";
 import { sha256 } from "../utils/users.utils.string";
 import mongoose, { ObjectId } from "mongoose";
+import { handleError } from "../errors/errors";
 
 export interface IUsersRepo {
     create(payload: users): Promise<users>;
@@ -20,7 +21,7 @@ export const UsersRepo: IUsersRepo = {
         try {
             return await createUsers(payload);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
     async login(payload: Partial<users>): Promise<users> {
@@ -48,21 +49,21 @@ export const UsersRepo: IUsersRepo = {
             return { ...user, private_key }
 
         } catch (e) {
-            throw e
+            throw handleError(e)
         }
     },
     async updateOne(id: any, set: Partial<users>): Promise<boolean> {
         try {
             return await updateUser(id, set);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
     async updateMany(get: any, set: Partial<users>): Promise<boolean> {
         try {
             return await updateMultipleUsers(get, set);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
     async fetchByEmail(email: string): Promise<users> {
@@ -90,7 +91,7 @@ export const UsersRepo: IUsersRepo = {
             }]);
             return cleanUserData(userData);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
 
@@ -112,7 +113,7 @@ export const UsersRepo: IUsersRepo = {
             if(process.env.NODE_ENV !== "production") console.log("PEEEKEY", private_key, userData);
             return {...userData, public_key: generatePublicKey(private_key as string), private_key}
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     }
 }

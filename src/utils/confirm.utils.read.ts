@@ -1,6 +1,7 @@
 import { PipelineStage } from "mongoose";
 import { model } from "../models/confirm.model";
 import { confirmUser } from "../types/confirm.type";
+import { handleError } from "../errors/errors";
 
 export const fetchConfirm = async (get: PipelineStage[]): Promise<confirmUser> => {
     try{
@@ -10,6 +11,6 @@ export const fetchConfirm = async (get: PipelineStage[]): Promise<confirmUser> =
 
         return data[0];
     } catch(e){
-        throw e;
+        throw handleError(e);
     }
 }

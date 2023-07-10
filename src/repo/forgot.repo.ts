@@ -4,6 +4,7 @@ import { users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { fetchForgot } from "../utils/forgot.utils.read";
 import { updateForgot } from "../utils/forgot.utils.update";
+import { handleError } from "../errors/errors";
 
 export interface IForgotRepo {
     create(user: users): Promise<forgotUser>;
@@ -32,7 +33,7 @@ export const ForgotRepo: IForgotRepo = {
                 }
             }]);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
 
@@ -48,14 +49,14 @@ export const ForgotRepo: IForgotRepo = {
                 }
             }]);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
     async updateOne(id: any, set: Partial<forgotUser>): Promise<boolean> {
         try {
             return await updateForgot(id, set);
         } catch (e) {
-            throw e;
+            throw handleError(e);
         }
     },
 }
