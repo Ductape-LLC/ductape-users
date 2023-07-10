@@ -2,13 +2,13 @@ import { ObjectId, PipelineStage } from "mongoose";
 import { model } from "../models/users.model";
 import { users } from "../types/users.type";
 import crypto from "crypto";
-import { handleError } from "../errors/errors";
+import { NotFoundError, handleError } from "../errors/errors";
 
 export const fetchUser =async (get: PipelineStage[]): Promise<users> => {
     try{
         const data = await model.aggregate(get);
 
-        if(!data.length) throw "User not found";
+        if(!data.length) throw new NotFoundError("User");
 
         return data[0]
     } catch(e){
@@ -22,9 +22,9 @@ export const fetchUserById = async (id: ObjectId): Promise<users> => {
 
         if(users) return users.toObject();
 
-        throw "User not founder";
+        throw new NotFoundError("User");
     } catch(e) {
-        throw e;
+        throw handleError(e);
     }
 }
 
@@ -36,7 +36,7 @@ export const cleanUserData = (data: users): users => {
 
         return {...data, public_key};
     } catch(e) {
-        throw e;
+        throw handleError(e);
     }
 }
 
@@ -44,7 +44,7 @@ export const generatePublicKey = (private_key: string): string => {
     try{
         return HmacSha1(process.env.ENC_KEY, private_key).toString();
     } catch(e) {
-        throw e;
+        throw handleError(e);
     }
 }
 
