@@ -5,10 +5,12 @@ import ERROR from "../commons/errorResponse";
 import UserSchema from "../validators/users.validator.create";
 import LoginSchema from "../validators/users.validator.login";
 import ForgotSchema from "../validators/users.validators.forgotpassword";
-  import { extractError } from "../utils/users.utils.string";
+import { extractError } from "../utils/users.utils.string";
 import { genericErrors } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
+import passport from 'passport'
+require ('../middleware/passport-setup.middleware')
 
 const router = Router();
 const usersService = new UsersService();
@@ -32,6 +34,47 @@ router.post(
     }
   }
 );
+
+router.get(
+  "/success",
+  async (req,res)=>{
+    console.log(req.user);
+    return res.status(201).json("SUCCESS");
+  }
+)
+
+router.get(
+  "/failure",
+  async (req,res)=>{
+    console.log(req.user);
+    return res.status(201).json("FAILURE");
+    // const {failure,success} = await googleAuth.registerWithGoogle(UserProfile)
+  }
+)
+
+router.get(
+  "/google",
+  passport.authenticate('google', {scope: ['profile', 'email']}), 
+  async(req,res)=>{
+    res.redirect('/success')
+  }
+)
+
+// router.get(
+//   "/google/callback", 
+//   passport.authenticate('google', { failureRedirect: '/failure' }),
+//   async (req, res) => {
+//     res.redirect('/success');
+// });
+
+router.get('/google/callback', 
+  passport.authenticate('google', { failureRedirect: '/failure' }),
+  function(req, res) {
+    // Successful authentication, redirect to /success or any other endpoint you want
+    res.redirect('/success');
+  }
+);
+
 
 router.post(
   "/login",

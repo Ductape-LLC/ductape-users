@@ -33,7 +33,8 @@ export const UsersRepo: IUsersRepo = {
                     email,
                     password
                 }
-            }, {
+            }, 
+            {
                 $lookup: {
                     from: "workspace_accesses",
                     foreignField: "user_id",

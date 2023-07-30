@@ -8,7 +8,12 @@ export const createUsers = async(payload: users): Promise<users> =>{
     try{
 
         const { password } = payload;
-        payload.password = sha256(password);
+        // payload.password = sha256(password);
+        if (typeof password === "string" && password.length > 0) {
+            payload.password = sha256(password);
+          } else {
+            throw new Error("Invalid password");
+          }
         payload.private_key = uuid();
         const create = await model.create(payload);
 

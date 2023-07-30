@@ -14,6 +14,7 @@ export interface IUsersService {
     confirmUserAccount(token: string, confirm_id: ObjectId): Promise<boolean>;
     validatePublicKeyJWT(token: string, user_id: ObjectId, public_key: string): Promise<unknown>;
     findByEmailAndUpdate(email:string, set: Partial<users>): Promise<boolean>;
+    findByEmail(email: string): Promise<users>
 }
 
 export default class UsersService implements IUsersService {
@@ -52,6 +53,12 @@ export default class UsersService implements IUsersService {
 
        return {...userData, auth_token }
    }
+
+//     googleAuth = {
+//         registerWithGoogle: async (oauthUser: any, email: any) => {
+//             // const userExists = await this.UserRepo.fetchByEmail({email: oauthUser.emails[0].value});
+//         }
+//    }
 
    async confirmUserAccount(token: string, confirm_id: ObjectId): Promise<boolean> {
         try {
