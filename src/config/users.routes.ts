@@ -27,7 +27,7 @@ router.post(
       const result = await usersService.createUserAccount(body);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      next();
+      next(e);
     }
   }
 );
@@ -46,7 +46,7 @@ router.post(
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
       if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-      next();
+      next(e);
     }
   }
 );
@@ -68,7 +68,7 @@ router.put(
 
     } catch(e) {
       if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-      next();
+      next(e);
     }
   }
 )
@@ -90,7 +90,7 @@ router.post(
 
     } catch(e) {
       if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-      next();
+      next(e);
     }
   }
 )
@@ -109,7 +109,7 @@ router.post(
 
     } catch(e) {
       if(process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!",e);
-      next();
+      next(e);
     }
   }
 )
@@ -138,7 +138,7 @@ router.get("/me", async (req: Request, res: Response, next: NextFunction) => {
 
   } catch (e) {
     if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
-    next();
+    next(e);
   }
 
 });
@@ -157,7 +157,7 @@ router.post(
       const result = await usersService.generateResetUserPassword(email);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      next();
+      next(e);
     }
   }
 );
@@ -178,7 +178,7 @@ router.get(
       }
 
     } catch (e) {
-      next();
+      next(e);
     }
   }
 )
@@ -198,7 +198,7 @@ router.post(
       return res.status(200).json(SUCCESS(result))
 
     } catch (e) {
-      next();
+      next(e);
     }
   }
 )
@@ -218,7 +218,7 @@ router.get(
       return res.status(200).json(SUCCESS(result))
 
     } catch (e) {
-      next();
+      next(e);
     }
   }
 )
