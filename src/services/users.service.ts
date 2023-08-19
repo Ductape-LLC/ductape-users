@@ -217,7 +217,8 @@ export default class UsersService implements IUsersService {
         try {
             const data = await this.UserRepo.fetchByIdReturnPrivateKey(user_id);
             const { public_key: p_key, private_key } = data;
-            if (p_key !== public_key) throw "Invalid key access";
+            if (p_key !== public_key) 
+                throw "Invalid key access";
 
             return await this.AuthRepo.validateUserAuthJWT(token, private_key as string);
         } catch (e) {
