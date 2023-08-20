@@ -72,6 +72,7 @@ export default class UsersService implements IUsersService {
                 return { ...userData };
             }
         } catch (e) {
+            console.log(e);
             throw handleError(e);
         }
     }
