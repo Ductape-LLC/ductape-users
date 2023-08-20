@@ -40,7 +40,42 @@ export const UsersRepo: IUsersRepo = {
                     localField: "_id",
                     as: "workspaces"
                 }
+            },
+            {
+              $unwind: "$workspaces" // Unwind the array created by $lookup
+            },
+            {
+              $lookup: {
+                from: "workspaces", // Assuming this is the name of the collection
+                localField: "workspaces.workspace_id",
+                foreignField: "_id",
+                as: "workspaceInfo"
+              }
+            },
+            {
+              $unwind: "$workspaceInfo" // Unwind the array created by $lookup
+            },
+            {
+              $addFields: {
+                "workspaces.workspace_name": "$workspaceInfo.name"
+              }
+            },
+            {
+              $group: {
+                _id: "$_id",
+                firstname: { $first: "$firstname"},
+                lastname: { $first: "$lastname"},
+                email: { $first: "$email"},
+                password: { $first: "$password"},
+                active: { $first: "$active"},
+                created: { $first: "$created"},
+                __v: { $first: "$__v"},
+                private_key: { $first: "$private_key"},
+                workspaces: { $push: "$workspaces" }
+              }
             }]);
+
+            console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
 
             const { private_key } = userData;
             const user = cleanUserData(userData);
@@ -49,6 +84,7 @@ export const UsersRepo: IUsersRepo = {
             return { ...user, private_key }
 
         } catch (e) {
+            console.log(e);
             throw handleError(e)
         }
     },
