@@ -57,7 +57,8 @@ export const UsersRepo: IUsersRepo = {
             },
             {
               $addFields: {
-                "workspaces.workspace_name": "$workspaceInfo.name"
+                "workspaces.workspace_name": "$workspaceInfo.name",
+                "workspaces.defaultEnvs": "$workspaceInfo.defaultEnvs"
               }
             },
             {
@@ -72,6 +73,7 @@ export const UsersRepo: IUsersRepo = {
                 __v: { $first: "$__v"},
                 private_key: { $first: "$private_key"},
                 workspaces: { $push: "$workspaces" }
+
               }
             }]);
 
