@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { Response } from "express";
-import ERR from "../../build/src/commons/errorResponse";
+import ERR from "../commons/errorResponse";
 import { ValidationError } from "joi";
 import { removeRegEx } from "../utils/strings.utils";
 
