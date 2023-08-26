@@ -7,7 +7,13 @@ export const fetchConfirm = async (get: PipelineStage[]): Promise<confirmUser> =
     try{
         const data = await model.aggregate(get);
 
-        if(!data.length) throw new UserError("Confirm credentials not found", 400);
+        if(!data.length){
+            if(process.env.NODE_ENV === "production") 
+                throw new UserError("Confirm credentials not found", 400);
+            else {
+                return null as unknown as confirmUser;
+            }
+        }
 
         return data[0];
     } catch(e){
