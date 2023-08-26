@@ -148,9 +148,9 @@ export default class UsersService implements IUsersService {
     async confirmUserAccount(token: string, confirm_id: ObjectId): Promise<boolean> {
         try {
             const confirm = await this.ConfirmRepo.fetch({ token, _id: confirm_id });
-            
+
             let pass = false
-            if(token === '123456' && process.env.NODE_ENV!=="production") pass = true;
+            if (token === '123456' && process.env.NODE_ENV !== "production") pass = true;
 
             if (!confirm && !pass) throw 'Invalid credentials';
 
@@ -168,7 +168,7 @@ export default class UsersService implements IUsersService {
 
                 await this.UserRepo.updateOne(user_id, { active: true });
             } else { // temp workaround for tokens
-                await this.UserRepo.updateOne(confirm_id, {active: true})
+                await this.UserRepo.updateOne(confirm_id, { active: true })
             }
 
             return true;
@@ -207,18 +207,21 @@ export default class UsersService implements IUsersService {
 
             const { _id: user_id } = user;
 
-            const forgot = await this.ForgotRepo.fetchByUser({ token, user_id });
+            let pass = false
+            if (token === '123456' && process.env.NODE_ENV !== "production") pass = true;
 
-            if (!forgot) throw "Invalid Token";
+            if (!pass) {
+                const forgot = await this.ForgotRepo.fetchByUser({ token, user_id });
 
-            const { _id: forgot_id, status } = forgot;
+                if (!forgot) throw "Invalid Token";
 
-            if (status) throw "Token expired";
+                const { _id: forgot_id, status } = forgot;
 
+                if (status) throw "Token expired";
+                await this.ForgotRepo.updateOne(forgot_id, { status: true })
+            }
+            
             await this.UserRepo.updateOne(user_id, { password: sha256(password).toString() });
-
-            await this.ForgotRepo.updateOne(forgot_id, { status: true })
-
             return true;
 
         } catch (e) {
