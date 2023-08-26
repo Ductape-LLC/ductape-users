@@ -89,7 +89,7 @@ export default class UsersService implements IUsersService {
                 const { otp_type, active } = otp;
 
                 let pass = false
-                if (token !== '123456' && process.env.NODE_ENV !== "production") pass = true;
+                if (token === '123456' && process.env.NODE_ENV !== "production") pass = true;
 
                 if (otp_type === otp_types.EMAIL) {
                     const valid = await this.OTPRepo.fetchByUser({ token, user_id })
@@ -150,7 +150,7 @@ export default class UsersService implements IUsersService {
             const confirm = await this.ConfirmRepo.fetch({ token, _id: confirm_id });
             
             let pass = false
-            if(token !== '123456' && process.env.NODE_ENV!=="production") pass = true;
+            if(token === '123456' && process.env.NODE_ENV!=="production") pass = true;
 
             if (!confirm && !pass) throw 'Invalid credentials';
 
@@ -173,6 +173,7 @@ export default class UsersService implements IUsersService {
 
             return true;
         } catch (e) {
+            console.log(e);
             throw handleError(e);
         }
     }
