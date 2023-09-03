@@ -6,12 +6,17 @@ import { NotFoundError, handleError } from "../errors/errors";
 
 export const fetchUser =async (get: PipelineStage[]): Promise<users> => {
     try{
+
+        console.log("GET!!",get);
         const data = await model.aggregate(get);
+
+        console.log("DATA!!!",data);
 
         if(!data.length) throw new NotFoundError("User");
 
         return data[0]
     } catch(e){
+        console.log(e);
         throw handleError(e);
     }
 }
