@@ -2,9 +2,9 @@ import { ObjectId, PipelineStage } from "mongoose";
 import { model } from "../models/users.model";
 import { users } from "../types/users.type";
 import crypto from "crypto";
-import { NotFoundError, handleError } from "../errors/errors";
+import { InvalidCredentials, NotFoundError, handleError } from "../errors/errors";
 
-export const fetchUser =async (get: PipelineStage[]): Promise<users> => {
+export const fetchUser =async (get: PipelineStage[], op?: string): Promise<users> => {
     try{
 
         console.log("GET!!",get);
@@ -12,6 +12,7 @@ export const fetchUser =async (get: PipelineStage[]): Promise<users> => {
 
         console.log("DATA!!!",data);
 
+        if(op === "login") throw new InvalidCredentials();
         if(!data.length) throw new NotFoundError("User");
 
         return data[0]
