@@ -81,7 +81,7 @@ export const UsersRepo: IUsersRepo = {
                     workspaces: { $push: "$workspaces" }
 
                 }
-            }]);
+            }], "login");
 
             console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
 
