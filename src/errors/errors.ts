@@ -50,6 +50,12 @@ export class UserNotAuthorized extends UserError {
   }
 }
 
+export class InvalidCredentials extends UserError {
+  constructor() {
+    super(`Invalid Credentials`, 401);
+  }
+}
+
 export class UserAlreadyExists extends UserError {
   constructor() {
     super(`user already exists`, 400);

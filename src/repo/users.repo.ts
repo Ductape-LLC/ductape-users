@@ -42,39 +42,45 @@ export const UsersRepo: IUsersRepo = {
                 }
             },
             {
-              $unwind: "$workspaces" // Unwind the array created by $lookup
+                $unwind: {
+                    path: "$workspaces", // Unwind the array created by $lookup
+                    preserveNullAndEmptyArrays: true,
+                }
             },
             {
-              $lookup: {
-                from: "workspaces", // Assuming this is the name of the collection
-                localField: "workspaces.workspace_id",
-                foreignField: "_id",
-                as: "workspaceInfo"
-              }
+                $lookup: {
+                    from: "workspaces", // Assuming this is the name of the collection
+                    localField: "workspaces.workspace_id",
+                    foreignField: "_id",
+                    as: "workspaceInfo"
+                }
             },
             {
-              $unwind: "$workspaceInfo" // Unwind the array created by $lookup
+                $unwind:{
+                    path: "$workspaceInfo", // Unwind the array created by $lookup
+                    preserveNullAndEmptyArrays: true
+                }
             },
             {
-              $addFields: {
-                "workspaces.workspace_name": "$workspaceInfo.name",
-                "workspaces.defaultEnvs": "$workspaceInfo.defaultEnvs"
-              }
+                $addFields: {
+                    "workspaces.workspace_name": "$workspaceInfo.name",
+                    "workspaces.defaultEnvs": "$workspaceInfo.defaultEnvs"
+                }
             },
             {
-              $group: {
-                _id: "$_id",
-                firstname: { $first: "$firstname"},
-                lastname: { $first: "$lastname"},
-                email: { $first: "$email"},
-                password: { $first: "$password"},
-                active: { $first: "$active"},
-                created: { $first: "$created"},
-                __v: { $first: "$__v"},
-                private_key: { $first: "$private_key"},
-                workspaces: { $push: "$workspaces" }
+                $group: {
+                    _id: "$_id",
+                    firstname: { $first: "$firstname" },
+                    lastname: { $first: "$lastname" },
+                    email: { $first: "$email" },
+                    password: { $first: "$password" },
+                    active: { $first: "$active" },
+                    created: { $first: "$created" },
+                    __v: { $first: "$__v" },
+                    private_key: { $first: "$private_key" },
+                    workspaces: { $push: "$workspaces" }
 
-              }
+                }
             }]);
 
             console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
@@ -106,7 +112,7 @@ export const UsersRepo: IUsersRepo = {
     },
     async fetchByEmail(email: string): Promise<users> {
 
-        const userData = await fetchUser([{$match: {email}}]);
+        const userData = await fetchUser([{ $match: { email } }]);
 
         const user = cleanUserData(userData);
 
@@ -147,9 +153,9 @@ export const UsersRepo: IUsersRepo = {
                     as: "workspaces"
                 }
             }]);
-            const {private_key} = userData;
-            if(process.env.NODE_ENV !== "production") console.log("PEEEKEY", private_key, userData);
-            return {...userData, public_key: generatePublicKey(private_key as string), private_key}
+            const { private_key } = userData;
+            if (process.env.NODE_ENV !== "production") console.log("PEEEKEY", private_key, userData);
+            return { ...userData, public_key: generatePublicKey(private_key as string), private_key }
         } catch (e) {
             throw handleError(e);
         }
