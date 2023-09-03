@@ -12,7 +12,7 @@ export const fetchUser =async (get: PipelineStage[], op?: string): Promise<users
 
         console.log("DATA!!!",data);
 
-        if(op === "login") throw new InvalidCredentials();
+        if(op === "login" && !data.length) throw new InvalidCredentials();
         if(!data.length) throw new NotFoundError("User");
 
         return data[0]
