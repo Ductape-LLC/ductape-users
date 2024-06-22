@@ -6,6 +6,7 @@ import UserSchema from "../validators/users.validator.create";
 import ChangePasswordSchema from "../validators/users.validator.changepassword";
 import LoginSchema from "../validators/users.validator.login";
 import OTPLoginSchema from "../validators/users.validator.otplogin";
+import AuthKeyLoginSchema from "../validators/users.validator.authkeylogin";
 import ForgotSchema from "../validators/users.validators.forgotpassword";
 import { extractError, stripAuth } from "../utils/users.utils.string";
 import { genericErrors } from "../types/users.type";
@@ -37,19 +38,34 @@ router.post(
   "/login",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { body } = req;
+      const { body, query } = req;
 
       await LoginSchema.validateAsync(body);
 
-      const result = await usersService.loginUserAccount(body);
-      if(process.env.NODE_ENV !== "production") console.log("SUCCESSS!!!!", result);
+      const result = await usersService.loginUserAccount(body, query);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       next(e);
     }
   }
 );
+
+// login
+router.post(
+  "/login/authKey",
+  async(req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { body } = req;
+
+      await AuthKeyLoginSchema.validateAsync(body);
+
+      const result = await usersService.loginUserAccountAuthKey(body);
+      return res.status(201).json(SUCCESS(result));
+    } catch (e) {
+      next (e);
+    }
+  }
+)
 
 // change password
 router.put(

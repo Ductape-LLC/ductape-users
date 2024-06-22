@@ -2,7 +2,7 @@ import EVENTBROKER from "../events";
 import { ConfirmRepo, IConfirmRepo } from "../repo/confirm.repo";
 import { AuthRepo, IAuthRepo } from "../repo/auth.repo";
 import { UsersRepo, IUsersRepo } from "../repo/users.repo";
-import { otp_types, users } from "../types/users.type";
+import { AuthKeyLoginPayload, otp_types, users } from "../types/users.type";
 import { EventType } from "../events/user.events.types";
 import { ObjectId } from "mongoose";
 import { confirmUser } from "../types/confirm.type";
@@ -13,7 +13,7 @@ import { handleError } from "../errors/errors";
 
 export interface IUsersService {
     createUserAccount(payload: users): Promise<users>;
-    loginUserAccount(payload: Partial<users>): Promise<users>;
+    loginUserAccount(payload: Partial<users>, query: {private_key?: boolean}): Promise<users>;
     confirmUserAccount(token: string, confirm_id: ObjectId): Promise<boolean>;
     validatePublicKeyJWT(token: string, user_id: ObjectId, public_key: string): Promise<unknown>;
 }
@@ -44,12 +44,15 @@ export default class UsersService implements IUsersService {
         return user;
     }
 
-    async loginUserAccount(payload: Partial<users>): Promise<users> {
+    async loginUserAccount(payload: Partial<users>, query: {private_key?: boolean}): Promise<users> {
         try {
             const userData = await this.UserRepo.login(payload);
 
             const { private_key, otp } = userData;
-            delete userData.private_key;
+
+            if (!query.private_key) {
+                delete userData.private_key;
+            }
 
             let otp_type, active;
 
@@ -73,6 +76,20 @@ export default class UsersService implements IUsersService {
             }
         } catch (e) {
             console.log(e);
+            throw handleError(e);
+        }
+    }
+
+    async loginUserAccountAuthKey(payload: AuthKeyLoginPayload): Promise<users> {
+        try {
+
+            const user = await this.UserRepo.fetchByPrivateKey(payload);
+
+            const auth_token = await this.AuthRepo.generateUserAuthJWT(user, payload.private_key as string, '100y');
+
+            return {...user, auth_token };
+
+        } catch(e) {
             throw handleError(e);
         }
     }

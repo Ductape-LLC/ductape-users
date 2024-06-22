@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+
+export interface AuthKeyLoginPayload {
+    user_id: string;
+    private_key: string;
+    workspace_id: string;
+}
 export interface users {
     _id?: mongoose.Schema.Types.ObjectId;
     created: Date;
