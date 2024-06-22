@@ -1,10 +1,10 @@
 import { cleanUserData, fetchUser, fetchUserById, generatePublicKey } from "../utils/users.utils.read";
-import { users } from "../types/users.type"
+import { AuthKeyLoginPayload, users } from "../types/users.type"
 import { createUsers } from "../utils/users.utils.create";
 import { updateUser, updateMultipleUsers } from "../utils/users.utils.update";
 import { sha256 } from "../utils/users.utils.string";
 import mongoose, { ObjectId } from "mongoose";
-import { handleError } from "../errors/errors";
+import { ActionNotAllow, handleError } from "../errors/errors";
 
 export interface IUsersRepo {
     create(payload: users): Promise<users>;
@@ -14,6 +14,7 @@ export interface IUsersRepo {
     fetchById(get: unknown): Promise<users>;
     fetchByEmail(email: string): Promise<users>;
     fetchByIdReturnPrivateKey(id: ObjectId): Promise<users>;
+    fetchByPrivateKey(payload: AuthKeyLoginPayload): Promise<users>;
 }
 
 export const UsersRepo: IUsersRepo = {
@@ -22,6 +23,84 @@ export const UsersRepo: IUsersRepo = {
             return await createUsers(payload);
         } catch (e) {
             throw handleError(e);
+        }
+    },
+    async fetchByPrivateKey(payload: AuthKeyLoginPayload): Promise<users> {
+        try {
+            const { private_key, workspace_id, user_id } = payload;
+            const userData = await fetchUser([{
+                $match: {
+                    _id: new mongoose.Types.ObjectId(String(user_id)),
+                    private_key,
+                }
+            }, {
+                $lookup: {
+                    from: "workspace_accesses",
+                    foreignField: "user_id",
+                    localField: "_id",
+                    as: "workspaces"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$workspaces", // Unwind the array created by $lookup
+                    preserveNullAndEmptyArrays: true,
+                }
+            },
+            {
+                $lookup: {
+                    from: "workspaces", // Assuming this is the name of the collection
+                    localField: "workspaces.workspace_id",
+                    foreignField: "_id",
+                    as: "workspaceInfo"
+                }
+            },
+            {
+                $unwind:{
+                    path: "$workspaceInfo", // Unwind the array created by $lookup
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $addFields: {
+                    "workspaces.workspace_name": "$workspaceInfo.name",
+                    "workspaces.defaultEnvs": "$workspaceInfo.defaultEnvs"
+                }
+            },
+            {
+                $group: {
+                    _id: "$_id",
+                    firstname: { $first: "$firstname" },
+                    lastname: { $first: "$lastname" },
+                    email: { $first: "$email" },
+                    password: { $first: "$password" },
+                    active: { $first: "$active" },
+                    created: { $first: "$created" },
+                    __v: { $first: "$__v" },
+                    private_key: { $first: "$private_key" },
+                    workspaces: { $push: "$workspaces" }
+
+                }
+            }], "login");
+
+            // const { private_key } = userData;
+            const user = cleanUserData(userData);
+            
+            let validWorkspace = false;
+
+            user.workspaces?.map((data)=> {
+                console.log(workspace_id, data.workspace_id);
+                if (String(data.workspace_id) === workspace_id) validWorkspace = true;
+            })
+
+
+            if(!validWorkspace) throw new ActionNotAllow()
+
+            return { ...user }
+
+        } catch (e) {
+            console.log(e);
+            throw handleError(e)
         }
     },
     async login(payload: Partial<users>): Promise<users> {
