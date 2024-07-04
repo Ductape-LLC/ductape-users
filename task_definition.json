@@ -1,0 +1,71 @@
+{
+  "family": "ductape-users-task-def",
+  "containerDefinitions": [
+    {
+      "name": "ductape-users",
+      "image": "IMAGE_VALUE",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "name": "ductape-users-8002-tcp",
+          "containerPort": 8002,
+          "hostPort": 8002,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true,
+      "environment": [
+        {
+          "name": "NODE_ENV",
+          "value": "NODE_ENV_VALUE"
+        },
+        {
+          "name": "MODULE",
+          "value": "MODULE_VALUE"
+        },
+        {
+          "name": "ENC_KEY",
+          "value": "ENC_KEY_VALUE"
+        },
+        {
+          "name": "DB_HOST",
+          "value": "DB_HOST_VALUE"
+        },
+        {
+          "name": "EMAIL_SERVICE",
+          "value": "EMAIL_SERVICE_VALUE"
+        },
+        {
+          "name": "DEVELOPER_SERVICE",
+          "value": "DEVELOPER_SERVICE_VALUE"
+        }
+      ],
+      "environmentFiles": [],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "ulimits": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/ductape-users-task-def",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        },
+        "secretOptions": []
+      }
+    }
+  ],
+  "taskRoleArn": "arn:aws:iam::423650960837:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::423650960837:role/ecsTaskExecutionRole",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "512",
+  "memory": "1024",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "volumes": []
+}
