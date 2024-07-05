@@ -17,10 +17,10 @@ app.use(urlRewrite);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = ['http://localhost:3000', 'https://ductape-hwyp.vercel.app'];
+// const allowedOrigins = ['http://localhost:3000', 'https://ductape-hwyp.vercel.app'];
 
 const options: cors.CorsOptions = {
-  origin: allowedOrigins,
+  // origin: allowedOrigins,
 };
 
 app.use(cors(options));
