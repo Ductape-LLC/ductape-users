@@ -25,6 +25,7 @@ export interface users {
     active: boolean;
     workspaces?: Array<any>;
     permissions?: Array<string>;
+    status?: string
 };
 
 export interface genericErrors { code?: number, _original: unknown, details: [{ message: string }] }

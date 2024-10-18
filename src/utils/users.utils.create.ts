@@ -18,6 +18,17 @@ export const createUsers = async(payload: users): Promise<users> =>{
         }
         throw new UserError("User creation failed", 400);
     } catch(e) {
+        
+        throw handleError(e);
+    }
+}
+
+export const createTemporayUsers = async(payload: Partial<users>): Promise<users> =>{
+    try{
+        const create = await model.create(payload);
+        return create
+        throw new UserError("User creation failed", 400);
+    } catch(e) {
         throw handleError(e);
     }
 }
