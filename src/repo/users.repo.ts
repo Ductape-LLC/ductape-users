@@ -1,18 +1,22 @@
-import { cleanUserData, fetchUser, fetchUserById, generatePublicKey } from "../utils/users.utils.read";
+import { cleanUserData, fetchUser, fetchUserById, generatePublicKey, fetchTemporaryUser } from "../utils/users.utils.read";
 import { AuthKeyLoginPayload, users } from "../types/users.type"
-import { createUsers } from "../utils/users.utils.create";
-import { updateUser, updateMultipleUsers } from "../utils/users.utils.update";
+import { createUsers, createTemporayUsers } from "../utils/users.utils.create";
+import { updateUser, updateMultipleUsers, updateTemporayUsers } from "../utils/users.utils.update";
 import { sha256 } from "../utils/users.utils.string";
 import mongoose, { ObjectId } from "mongoose";
 import { ActionNotAllow, handleError } from "../errors/errors";
+import { UserStatus } from "../events/user.events.types";
 
 export interface IUsersRepo {
     create(payload: users): Promise<users>;
+    createTemporaryUser(payload: Partial<users>): Promise<users>;
+    updateTemporaryUser(id: unknown, payload: Partial<users>): Promise<users>;
     login(payload: Partial<users>): Promise<users>;
     updateOne(id: unknown, set: Partial<users>): Promise<boolean>;
     updateMany(get: unknown, set: Partial<users>): Promise<boolean>;
     fetchById(get: unknown): Promise<users>;
     fetchByEmail(email: string): Promise<users>;
+    getTemporaryUser(email: string): Promise<users>;
     fetchByIdReturnPrivateKey(id: ObjectId): Promise<users>;
     fetchByPrivateKey(payload: AuthKeyLoginPayload): Promise<users>;
 }
@@ -25,6 +29,25 @@ export const UsersRepo: IUsersRepo = {
             throw handleError(e);
         }
     },
+
+    async createTemporaryUser(payload: Partial<users>): Promise<users> {
+        try {
+            return await createTemporayUsers(payload);
+        } catch (e) {
+            throw handleError(e);
+        }
+    },
+
+    async updateTemporaryUser(id: any, payload: Partial<users>): Promise<users> {
+        try {
+            return await updateTemporayUsers(id, payload);
+        } catch (e) {
+            throw handleError(e);
+        }
+    },
+
+
+
     async fetchByPrivateKey(payload: AuthKeyLoginPayload): Promise<users> {
         try {
             const { private_key, workspace_id, user_id } = payload;
@@ -192,12 +215,14 @@ export const UsersRepo: IUsersRepo = {
     async fetchByEmail(email: string): Promise<users> {
 
         const userData = await fetchUser([{ $match: { email } }]);
-
         const user = cleanUserData(userData);
-
         return user;
     },
+    async getTemporaryUser(email: string): Promise<users> {
 
+        const user = await fetchTemporaryUser([{ $match: { email } }]);
+        return user;
+    },
     async fetchById(id: ObjectId): Promise<users> {
         try {
             const userData = await fetchUser([{

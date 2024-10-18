@@ -3,6 +3,7 @@ import UsersService from "../services/users.service";
 import SUCCESS from "../commons/successResponse";
 import ERROR from "../commons/errorResponse";
 import UserSchema from "../validators/users.validator.create";
+import TemporaryUserSchema from "../validators/users.validator.temporaryuser";
 import ChangePasswordSchema from "../validators/users.validator.changepassword";
 import LoginSchema from "../validators/users.validator.login";
 import OTPLoginSchema from "../validators/users.validator.otplogin";
@@ -26,6 +27,22 @@ router.post(
       await UserSchema.validateAsync(body);
 
       const result = await usersService.createUserAccount(body);
+      return res.status(201).json(SUCCESS(result));
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+// Create Temporary User
+router.post(
+  "/create-temporary-user",
+  validateModuleRequest,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { body } = req;
+      await TemporaryUserSchema.validateAsync(body);
+      const result = await usersService.createTemporary(body);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
       next(e);

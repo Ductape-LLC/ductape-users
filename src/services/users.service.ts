@@ -3,7 +3,7 @@ import { ConfirmRepo, IConfirmRepo } from '../repo/confirm.repo';
 import { AuthRepo, IAuthRepo } from '../repo/auth.repo';
 import { UsersRepo, IUsersRepo } from '../repo/users.repo';
 import { AuthKeyLoginPayload, otp_types, users } from '../types/users.type';
-import { EventType } from '../events/user.events.types';
+import { EventType, UserStatus } from '../events/user.events.types';
 import { ObjectId } from 'mongoose';
 import { confirmUser } from '../types/confirm.type';
 import { ForgotRepo, IForgotRepo } from '../repo/forgot.repo';
@@ -34,13 +34,21 @@ export default class UsersService implements IUsersService {
   }
 
   async createUserAccount(payload: users): Promise<users> {
-    const user = await this.UserRepo.create(payload);
-
+    let user = await this.UserRepo.getTemporaryUser(payload.email)
+    if (user && user.status === UserStatus.TEMPORARY){
+      user = await this.UserRepo.updateTemporaryUser(user._id, payload)
+    } else {
+      user = await this.UserRepo.create(payload);
+    }
     const confirm = await this.ConfirmRepo.create(user);
     const { _id: confirm_id, token } = confirm;
     const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('2m')}`;
-
     EVENTBROKER({ event: EventType.CONFIRM_EMAIL, data: { user, token, confirm_id, auth } });
+    return user
+  }
+
+  async createTemporary(payload: users): Promise<users> {
+    const user = await this.UserRepo.createTemporaryUser(payload);
     return user;
   }
 

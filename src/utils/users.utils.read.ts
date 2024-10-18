@@ -22,6 +22,19 @@ export const fetchUser =async (get: PipelineStage[], op?: string): Promise<users
     }
 }
 
+export const fetchTemporaryUser =async (get: PipelineStage[]): Promise<users> => {
+    try{
+
+        console.log("GET!!",get);
+        const data = await model.aggregate(get);
+        console.log("DATA!!!",data);
+        return data[0]
+    } catch(e){
+        console.log(e);
+        throw handleError(e);
+    }
+}
+
 export const fetchUserById = async (id: ObjectId): Promise<users> => {
     try{
         const users = await model.findById(id);
