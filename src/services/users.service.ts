@@ -243,11 +243,13 @@ export default class UsersService implements IUsersService {
   async validatePublicKeyJWT(token: string, user_id: ObjectId, public_key: string): Promise<unknown> {
     try {
       const data = await this.UserRepo.fetchByIdReturnPrivateKey(user_id);
+      console.log(data);
       const { public_key: p_key, private_key } = data;
       if (p_key !== public_key) throw 'Invalid key access';
 
       return await this.AuthRepo.validateUserAuthJWT(token, private_key as string);
     } catch (e) {
+      console.log(e)
       throw handleError(e);
     }
   }
