@@ -91,6 +91,12 @@ export class AxiosErr extends UserError {
 }
 
 export function handleError(error: unknown): UserError | AxiosErr | SystemError {
+  console.log(error);
+  //@ts-ignore
+  if (error?.code === 11000) {
+    return new UserAlreadyExists();
+  }
+
   if (error instanceof UserError) {
     return error;
   }
