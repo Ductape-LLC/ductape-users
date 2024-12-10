@@ -19,7 +19,8 @@ const schema = new mongoose.Schema<users>({
     bio: {type: String},
     // @ts-ignore
     private_key: {type: String, 'default': uuid},
-    active: {type: Boolean, 'default': false}
+    active: {type: Boolean, 'default': false},
+    profilePicture:  {type: String, 'default': ''}
 })
 
 export const model = mongoose.model('users', schema);

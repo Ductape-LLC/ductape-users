@@ -3,8 +3,10 @@ import UsersService from "../services/users.service";
 import SUCCESS from "../commons/successResponse";
 import ERROR from "../commons/errorResponse";
 import UserSchema from "../validators/users.validator.create";
+import UserUpdateSchema from "../validators/users.validator.update";
 import TemporaryUserSchema from "../validators/users.validator.temporaryuser";
 import ChangePasswordSchema from "../validators/users.validator.changepassword";
+import changePasswordSchema from "../validators/users.validator.change-password";
 import LoginSchema from "../validators/users.validator.login";
 import OTPLoginSchema from "../validators/users.validator.otplogin";
 import AuthKeyLoginSchema from "../validators/users.validator.authkeylogin";
@@ -13,6 +15,7 @@ import { extractError, stripAuth } from "../utils/users.utils.string";
 import { genericErrors } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
+import { validateUserAccess } from "../middleware/users.middleware.access";
 
 const router = Router();
 const usersService = new UsersService();
@@ -34,7 +37,28 @@ router.post(
   }
 );
 
-// Create Temporary User
+
+router.patch(
+  "/update",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { body, user } = req;
+      const { _id } = user
+
+
+      await UserUpdateSchema.validateAsync(body);
+      const result = await usersService.updateUserAccount(body, _id);
+
+      return res.status(201).json(SUCCESS(result));
+    } catch (e) {
+      console.log(e)
+      next(e);
+    }
+  }
+);
+
+
 router.post(
   "/create-temporary-user",
   validateModuleRequest,
@@ -106,7 +130,30 @@ router.put(
   }
 )
 
-// login with otp
+router.put(
+  "/change-password",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { body, user } = req;
+      const { email } = user
+
+      await changePasswordSchema.validateAsync(body);
+
+      const { oldPassword, newPassword } = body;
+
+      const result = await usersService.changeUserPassword(email, oldPassword, newPassword);
+
+      return res.status(200).json(SUCCESS(result));
+
+    } catch(e) {
+      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+      return res.status(400).json(ERROR(e));
+    }
+  }
+)
+
+
 router.post(
   "/login/otp",
   async (req: Request, res: Response, next: NextFunction) => {
