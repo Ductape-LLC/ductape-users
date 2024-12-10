@@ -9,7 +9,7 @@ import { confirmUser } from '../types/confirm.type';
 import { ForgotRepo, IForgotRepo } from '../repo/forgot.repo';
 import { IOTPRepo, OTPRepo } from '../repo/otp.repo';
 import sha256 from 'crypto-js/sha256';
-import { handleError } from '../errors/errors';
+import { handleError, NotFoundError } from '../errors/errors';
 
 export interface IUsersService {
   createUserAccount(payload: users): Promise<users>;
@@ -44,6 +44,15 @@ export default class UsersService implements IUsersService {
     const { _id: confirm_id, token } = confirm;
     const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('2m')}`;
     EVENTBROKER({ event: EventType.CONFIRM_EMAIL, data: { user, token, confirm_id, auth } });
+    return user
+  }
+
+  async updateUserAccount(payload: users, id: string): Promise<users> {
+    let user = await this.findByUserId(id)
+    if (!user) throw new NotFoundError('user')
+      
+    const result = await this.UserRepo.updateOne(id, payload);
+    user = await this.findByUserId(id)
     return user
   }
 
@@ -238,6 +247,19 @@ export default class UsersService implements IUsersService {
     } catch (e) {
       throw handleError(e);
     }
+  }
+
+  async changeUserPassword(email: string, oldPassword: string, newPassword: string): Promise<boolean> {
+    const user = await this.UserRepo.fetchByEmail(email);
+
+    if (!user) throw 'Email does not exist';
+
+    const isPasswordValid = sha256(oldPassword).toString() === user.password;
+    if (!isPasswordValid) throw 'Current password is incorrect'
+
+    await this.UserRepo.updateOne(user._id, { password: sha256(newPassword).toString() });
+
+    return true;
   }
 
   async validatePublicKeyJWT(token: string, user_id: ObjectId, public_key: string): Promise<unknown> {

@@ -25,7 +25,8 @@ export interface users {
     active: boolean;
     workspaces?: Array<any>;
     permissions?: Array<string>;
-    status?: string
+    status?: string,
+    profilePicture?: string
 };
 
 export interface genericErrors { code?: number, _original: unknown, details: [{ message: string }] }
@@ -41,7 +42,10 @@ export interface otp_login {
 }
 
 export interface change_password {
-    email: string;
-    password: string;
-    token: string;
+    email?: string;
+    password?: string;
+    token?: string;
+    oldPassword?: string;
+    newPassword?: string;
+    confirmNewPassword?: string;
 }

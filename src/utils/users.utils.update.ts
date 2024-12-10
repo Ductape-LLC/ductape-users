@@ -9,7 +9,7 @@ import { UserStatus } from "../events/user.events.types";
 
 export const updateUser =async (id: unknown, set: Partial<users>): Promise<boolean> => {
     try{
-        const update = await model.findByIdAndUpdate(id, {$set: {...set}});
+        const update = await model.findByIdAndUpdate(id, {$set: {...set}}, { upsert: true, new: true });
 
         if(update) return true;
         return false;
