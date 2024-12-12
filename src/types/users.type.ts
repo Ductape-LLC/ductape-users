@@ -25,8 +25,9 @@ export interface users {
     active: boolean;
     workspaces?: Array<any>;
     permissions?: Array<string>;
-    status?: string,
-    profilePicture?: string
+    status?: string;
+    profilePicture?: string;
+    googleId?: string;
 };
 
 export interface genericErrors { code?: number, _original: unknown, details: [{ message: string }] }
