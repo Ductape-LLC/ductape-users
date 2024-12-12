@@ -33,12 +33,12 @@ export default class UsersService implements IUsersService {
     this.OTPRepo = OTPRepo;
   }
 
-  async createUserAccount(payload: users): Promise<users> {
-    let user = await this.UserRepo.getTemporaryUser(payload.email)
+  async createUserAccount(payload: Partial<users>): Promise<users> {
+    let user = await this.UserRepo.getTemporaryUser(payload.email as string)
     if (user && user.status === UserStatus.TEMPORARY){
       user = await this.UserRepo.updateTemporaryUser(user._id, payload)
     } else {
-      user = await this.UserRepo.create(payload);
+      user = await this.UserRepo.create(payload as users);
     }
     const confirm = await this.ConfirmRepo.create(user);
     const { _id: confirm_id, token } = confirm;

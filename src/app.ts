@@ -1,5 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import mongoose from 'mongoose';
+import passport from 'passport';
 import * as dotEnv from 'dotenv';
 import router from './commons/routesConfig';
 import cors from 'cors';
@@ -38,6 +39,10 @@ mongoose.connect(process.env.DB_HOST as string).catch((e) => {
 mongoose.connection.on('open', () => {
   if (process.env.NODE_ENV !== 'production') console.log('Mongoose Connection');
 });
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.listen(port, () => {
   if (process.env.NODE_ENV !== 'production') console.log(`ductape-users-api app is running on port ${port}.`);

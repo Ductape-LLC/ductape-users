@@ -12,13 +12,28 @@ import OTPLoginSchema from "../validators/users.validator.otplogin";
 import AuthKeyLoginSchema from "../validators/users.validator.authkeylogin";
 import ForgotSchema from "../validators/users.validators.forgotpassword";
 import { extractError, stripAuth } from "../utils/users.utils.string";
-import { genericErrors } from "../types/users.type";
+import { genericErrors, users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
 import { validateUserAccess } from "../middleware/users.middleware.access";
+import passport from 'passport';
+require('../passports/google.passport')
 
 const router = Router();
 const usersService = new UsersService();
+
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as users;
+    console.log('USER', user)
+    const result = await usersService.loginUserAccount(user, {});
+      return res.status(201).json(SUCCESS(result));
+  }
+);
 
 // create new user
 router.post(
@@ -37,18 +52,17 @@ router.post(
   }
 );
 
-
 router.patch(
   "/update",
   validateUserAccess,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { body, user } = req;
-      const { _id } = user
+      const { _id } = user as users
 
 
       await UserUpdateSchema.validateAsync(body);
-      const result = await usersService.updateUserAccount(body, _id);
+      const result = await usersService.updateUserAccount(body, _id as unknown as string);
 
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
@@ -136,7 +150,7 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { body, user } = req;
-      const { email } = user
+      const { email } = user as users
 
       await changePasswordSchema.validateAsync(body);
 

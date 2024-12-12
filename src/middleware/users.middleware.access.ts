@@ -4,11 +4,12 @@ import ERROR from "../commons/errorResponse";
 import { stripAuth } from "../utils/users.utils.string";
 import { UsersRepo } from "../repo/users.repo";
 import { JwtPayload } from 'jsonwebtoken';
+import { users } from "src/types/users.type";
 
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload | any;
+      user?: User;
     }
   }
 }
@@ -34,7 +35,7 @@ export const validateUserAccess = async (req: Request, res: Response, next: Next
         const { public_key: p_key, private_key } = data;
         if (p_key !== public_key) throw 'Invalid key access';
 
-        const result = await AuthRepo.validateUserAuthJWT(token, private_key as string);
+        const result = await AuthRepo.validateUserAuthJWT(token, private_key as string) as users;
 
         if(result){
             

@@ -6,6 +6,7 @@ import { UserStatus } from "../events/user.events.types";
 // const uuid = require('uuid/v1');
 const schema = new mongoose.Schema<users>({
     created: {type: Date, 'default': Date.now},
+    googleId: {type: String},
     firstname: {type: String},
     lastname: {type: String},
     email: {type: String, unique: true},
