@@ -154,7 +154,9 @@ router.put(
 
       await changePasswordSchema.validateAsync(body);
 
-      const { oldPassword, newPassword } = body;
+      const { oldPassword, newPassword, confirmNewPassword } = body;
+
+      if (newPassword !== confirmNewPassword) throw 'Passwords do not match.';
 
       const result = await usersService.changeUserPassword(email, oldPassword, newPassword);
 
@@ -210,25 +212,16 @@ router.post(
 
 
 // fetch information of token holder
-router.get("/me", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/me", validateUserAccess, async (req: Request, res: Response, next: NextFunction) => {
 
   try {
 
-    const { body, query, params } = req;
-    const auth_token = req.headers["x-access-token"] as string || req.headers["authorization"] as string;
+    const { user } = req;
+    const { _id } = user as users
 
-    if (!auth_token) return res.status(401).json(ERROR("Missing Auth Token"));
+    console.log(_id)
 
-    const token = stripAuth(auth_token);
-    let { public_key, user_id } = body;
-
-    if (!user_id) user_id = params.user_id || query.user_id;
-    if (!public_key) public_key = params.public_key || query.public_key;
-
-
-    await usersService.validatePublicKeyJWT(token, user_id, public_key);
-
-    return res.status(201).json(SUCCESS(await usersService.findByUserId(user_id)));
+    return res.status(201).json(SUCCESS(await usersService.findByUserId(_id as unknown as string)));
 
   } catch (e) {
     if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
