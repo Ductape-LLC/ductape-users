@@ -59,7 +59,9 @@ jobs:
             "DB_HOST_VALUE": "${{ secrets.DB_HOST }}",
             "EMAIL_SERVICE_VALUE": "${{ secrets.EMAIL_SERVICE }}",
             "DEVELOPER_SERVICE_VALUE": "${{ secrets.DEVELOPER_SERVICE }}",
-            "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}"
+            "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}",
+            "GOOGLE_CLIENT_ID_VALUE": "${{ secrets.GOOGLE_CLIENT_ID }}",
+            "GOOGLE_CLIENT_SECRET_VALUE": "${{ secrets.GOOGLE_CLIENT_SECRET }}"
             }'
 
       - name: Print Task Definition
