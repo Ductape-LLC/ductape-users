@@ -16,6 +16,7 @@ export interface IUsersRepo {
     updateMany(get: unknown, set: Partial<users>): Promise<boolean>;
     fetchById(get: unknown): Promise<users>;
     fetchByEmail(email: string): Promise<users>;
+    fetchTempUser(payload: users): Promise<users>;
     getTemporaryUser(email: string): Promise<users>;
     fetchByIdReturnPrivateKey(id: ObjectId): Promise<users>;
     fetchByPrivateKey(payload: AuthKeyLoginPayload): Promise<users>;
@@ -216,6 +217,11 @@ export const UsersRepo: IUsersRepo = {
 
         const userData = await fetchUser([{ $match: { email } }]);
         const user = cleanUserData(userData);
+        return user;
+    },
+    async fetchTempUser(payload: users): Promise<users> {
+
+        const user = await fetchUser([{ $match: { ...payload } }]);
         return user;
     },
     async getTemporaryUser(email: string): Promise<users> {

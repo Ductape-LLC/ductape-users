@@ -57,6 +57,8 @@ export default class UsersService implements IUsersService {
   }
 
   async createTemporary(payload: users): Promise<users> {
+    const _user = await this.UserRepo.fetchTempUser(payload)
+    if (_user) return _user
     const user = await this.UserRepo.createTemporaryUser(payload);
     return user;
   }
