@@ -222,7 +222,7 @@ export const UsersRepo: IUsersRepo = {
     },
     async fetchTempUser(payload: users): Promise<users> {
 
-        const user = await fetchUser([{ $match: { ...payload } }]);
+        const user = await fetchTemporaryUser([{ $match: { ...payload } }]);
         return user;
     },
     async getTemporaryUser(email: string): Promise<users> {
