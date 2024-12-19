@@ -7,6 +7,7 @@ import { UserStatus } from "../events/user.events.types";
 const schema = new mongoose.Schema<users>({
     created: {type: Date, 'default': Date.now},
     googleId: {type: String},
+    githubId: {type: String},
     firstname: {type: String},
     lastname: {type: String},
     email: {type: String, unique: true},

@@ -1,5 +1,5 @@
 import passport from 'passport';
-import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
+import GitHubStrategy, { Profile } from 'passport-github';
 import { model as UserModel } from '../models/users.model';
 import dotenv from 'dotenv';
 import { users } from '../types/users.type';
@@ -10,32 +10,31 @@ dotenv.config();
 const usersService = new UsersService();
 
 passport.use(
-  new GoogleStrategy(
+  new GitHubStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      callbackURL: `${process.env.USER_SERVICE}/users/v1/auth/google/callback`,
+      clientID: process.env.GITHUB_CLIENT_ID as string,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      callbackURL: `${process.env.USER_SERVICE}/users/v1/auth/github/callback`,
     },
     async (accessToken: string, refreshToken: string, profile: Profile, done) => {
-      const { id, name, emails } = profile;
+      const { id, emails, username } = profile;
       const email = emails?.[0].value;
-      const user = await UserModel.findOne({ $or: [{ googleId: id }, { email }] });
+      const user = await UserModel.findOne({ $or: [{ githubId: id }, { email }] });
 
       if (user) {
-        console.log("USER :::", user)
         await UserModel.findByIdAndUpdate(
           user._id,
-          { $set: { googleId: id } },
+          { $set: { githubId: id } },
           { new: true, upsert: true },
         );
         return done(null, user);
       } else {
         const body = {
-          googleId: id,
-          firstname: name?.givenName || '',
-          lastname: name?.familyName || '',
+          githubId: id,
+          firstname: username || '',
+          lastname: '',
           email,
-          password: `${email}${id}`
+          password: `${email}${id}`,
         };
         const user = await usersService.createUserAccount(body);
         return done(null, user);

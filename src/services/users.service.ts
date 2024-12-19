@@ -2,7 +2,7 @@ import EVENTBROKER from '../events';
 import { ConfirmRepo, IConfirmRepo } from '../repo/confirm.repo';
 import { AuthRepo, IAuthRepo } from '../repo/auth.repo';
 import { UsersRepo, IUsersRepo } from '../repo/users.repo';
-import { AuthKeyLoginPayload, otp_types, users } from '../types/users.type';
+import { AuthKeyLoginPayload, OauthServices, otp_types, users } from '../types/users.type';
 import { EventType, UserStatus } from '../events/user.events.types';
 import { ObjectId } from 'mongoose';
 import { confirmUser } from '../types/confirm.type';
@@ -63,8 +63,15 @@ export default class UsersService implements IUsersService {
     return user;
   }
 
-  async loginUserAccount(payload: Partial<users>, query: { private_key?: boolean }): Promise<users> {
+  async loginUserAccount(payload: Partial<users>, query: { private_key?: boolean }, oauth_service? : OauthServices): Promise<users> {
     try {
+      
+      if (oauth_service){
+        Object.assign(payload, {
+          oauth_service
+        })
+      }
+
       const userData = await this.UserRepo.login(payload);
 
       const { private_key, otp } = userData;

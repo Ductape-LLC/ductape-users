@@ -12,25 +12,44 @@ import OTPLoginSchema from "../validators/users.validator.otplogin";
 import AuthKeyLoginSchema from "../validators/users.validator.authkeylogin";
 import ForgotSchema from "../validators/users.validators.forgotpassword";
 import { extractError, stripAuth } from "../utils/users.utils.string";
-import { genericErrors, users } from "../types/users.type";
+import { genericErrors, OauthServices, users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
 import { validateUserAccess } from "../middleware/users.middleware.access";
 import passport from 'passport';
-require('../passports/google.passport')
+import '../passports/google.passport'
+import '../passports/github.passport'
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const router = Router();
 const usersService = new UsersService();
 
+
+// OAuth Services
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get(
   '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', { session: false, failureRedirect: process.env.DUCTAPE_SIGNIN_URL }),
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user as users;
-    console.log('USER', user)
-    const result = await usersService.loginUserAccount(user, {});
+
+    const result = await usersService.loginUserAccount(user, {}, OauthServices.GOOGLE);
+      return res.status(201).json(SUCCESS(result));
+  }
+);
+
+router.get('/auth/github', passport.authenticate('github', { scope: ['user:email']  }));
+
+router.get(
+  '/auth/github/callback',
+  passport.authenticate('github', { session: false, failureRedirect: process.env.DUCTAPE_SIGNIN_URL }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as users;
+
+    const result = await usersService.loginUserAccount(user, {}, OauthServices.GITHUB);
       return res.status(201).json(SUCCESS(result));
   }
 );

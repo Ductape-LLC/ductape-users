@@ -129,13 +129,14 @@ export const UsersRepo: IUsersRepo = {
     },
     async login(payload: Partial<users>): Promise<users> {
         try {
-            const { email, password: raw } = payload
+            const { email, password: raw, oauth_service } = payload;
             const password = sha256(raw as string);
+            let match: { email: string | undefined, password?: string } = { email };
+            if (!oauth_service) {
+                match.password = password;
+            }
             const userData = await fetchUser([{
-                $match: {
-                    email,
-                    password
-                }
+                $match: match
             }, {
                 $lookup: {
                     from: "workspace_accesses",
