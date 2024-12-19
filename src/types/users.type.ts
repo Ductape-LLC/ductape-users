@@ -28,6 +28,8 @@ export interface users {
     status?: string;
     profilePicture?: string;
     googleId?: string;
+    githubId?: string;
+    oauth_service?: string;
 };
 
 export interface genericErrors { code?: number, _original: unknown, details: [{ message: string }] }
@@ -35,6 +37,11 @@ export interface genericErrors { code?: number, _original: unknown, details: [{ 
 export enum otp_types {
     EMAIL = "email",
     GOOGLE_AUTH = "google"
+}
+
+export enum OauthServices {
+    GOOGLE = "google",
+    GITHUB = "github"
 }
 
 export interface otp_login {

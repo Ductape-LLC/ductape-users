@@ -41,7 +41,6 @@ mongoose.connection.on('open', () => {
 });
 
 app.use(passport.initialize());
-app.use(passport.session());
 
 
 app.listen(port, () => {

@@ -11,8 +11,10 @@ declare global {
     interface Request {
       user?: User;
     }
+    interface User extends users {}
   }
 }
+
 
 export const validateUserAccess = async (req: Request, res: Response, next: NextFunction): Promise<any> => {
     console.log("TRY");
