@@ -12,8 +12,8 @@ const usersService = new UsersService();
 passport.use(
   new GitHubStrategy(
     {
-      clientID: process.env.GITHUB_CLIENT_ID as string,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET as string,
+      clientID: process.env.GIT_CLIENT_ID as string,
+      clientSecret: process.env.GIT_CLIENT_SECRET as string,
       callbackURL: `${process.env.USER_SERVICE}/users/v1/auth/github/callback`,
     },
     async (accessToken: string, refreshToken: string, profile: Profile, done) => {

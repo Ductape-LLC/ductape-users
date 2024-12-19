@@ -47,6 +47,14 @@
         {
           "name": "GOOGLE_CLIENT_SECRET",
           "value": "GOOGLE_CLIENT_SECRET_VALUE"
+        },
+        {
+          "name": "GIT_CLIENT_ID",
+          "value": "GIT_CLIENT_ID_VALUE"
+        },
+        {
+          "name": "GIT_CLIENT_SECRET",
+          "value": "GIT_CLIENT_SECRET_VALUE"
         }
       ],
       "environmentFiles": [],

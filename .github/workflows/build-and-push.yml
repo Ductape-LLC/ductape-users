@@ -61,7 +61,9 @@ jobs:
             "DEVELOPER_SERVICE_VALUE": "${{ secrets.DEVELOPER_SERVICE }}",
             "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}",
             "GOOGLE_CLIENT_ID_VALUE": "${{ secrets.GOOGLE_CLIENT_ID }}",
-            "GOOGLE_CLIENT_SECRET_VALUE": "${{ secrets.GOOGLE_CLIENT_SECRET }}"
+            "GOOGLE_CLIENT_SECRET_VALUE": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
+            "GIT_CLIENT_ID_VALUE": "${{ secrets.GIT_CLIENT_ID }}",
+            "GIT_CLIENT_SECRET_VALUE": "${{ secrets.GIT_CLIENT_SECRET }}"
             }'
 
       - name: Print Task Definition
