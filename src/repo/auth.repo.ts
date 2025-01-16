@@ -29,6 +29,7 @@ export const AuthRepo: IAuthRepo = {
         try{
             return JWT.verify(jwt, private_key);
         } catch (e) {
+            console.log(jwt, e);
             throw handleError(e);
         }
     }
