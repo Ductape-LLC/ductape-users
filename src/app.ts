@@ -6,6 +6,7 @@ import router from './commons/routesConfig';
 import cors from 'cors';
 import { UserError, sendErrorResponse } from './errors/errors';
 import { urlRewrite } from './middleware/url-rewrite';
+import session from 'express-session';
 
 const app = express();
 const port = process.env.PORT || 8002;
@@ -40,8 +41,18 @@ mongoose.connection.on('open', () => {
   if (process.env.NODE_ENV !== 'production') console.log('Mongoose Connection');
 });
 
-app.use(passport.initialize());
 
+// app.use(
+//     session({
+//         secret: 'your_secret_key', // Replace with a strong secret key
+//         resave: false,
+//         saveUninitialized: true,
+//         cookie: { secure: false }, // Set to true if using HTTPS
+//     }),
+// );
+
+app.use(passport.initialize());
+// app.use(passport.session());
 
 app.listen(port, () => {
   if (process.env.NODE_ENV !== 'production') console.log(`ductape-users-api app is running on port ${port}.`);
@@ -50,3 +61,4 @@ app.listen(port, () => {
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   sendErrorResponse(res, err as UserError);
 });
+

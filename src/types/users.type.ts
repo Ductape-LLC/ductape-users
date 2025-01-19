@@ -29,6 +29,7 @@ export interface users {
     profilePicture?: string;
     googleId?: string;
     githubId?: string;
+    linkedinId: string;
     oauth_service?: string;
 };
 
@@ -41,7 +42,8 @@ export enum otp_types {
 
 export enum OauthServices {
     GOOGLE = "google",
-    GITHUB = "github"
+    GITHUB = "github",
+    LINKEDIN = "linkedIn"
 }
 
 export interface otp_login {
