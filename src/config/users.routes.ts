@@ -17,8 +17,9 @@ import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
 import { validateUserAccess } from "../middleware/users.middleware.access";
 import passport from 'passport';
-import '../passports/google.passport'
-import '../passports/github.passport'
+import '../passports/google.passport';
+import '../passports/github.passport';
+import '../passports/linkedIn.passport';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -37,11 +38,11 @@ router.get(
     const user = req.user as users;
 
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GOOGLE);
-      return res.status(201).json(SUCCESS(result));
+    return res.status(201).json(SUCCESS(result));
   }
 );
 
-router.get('/auth/github', passport.authenticate('github', { scope: ['user:email']  }));
+router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
 
 router.get(
   '/auth/github/callback',
@@ -50,9 +51,33 @@ router.get(
     const user = req.user as users;
 
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GITHUB);
-      return res.status(201).json(SUCCESS(result));
+    return res.status(201).json(SUCCESS(result));
   }
 );
+
+router.get('/auth/linkedin', passport.authenticate('linkedin', { scope: ['openid', 'profile', 'email'], }));
+
+router.get(
+  '/auth/linkedin/callback',
+  passport.authenticate('linkedin', {
+    session: false,
+    failureRedirect: process.env.DUCTAPE_SIGNIN_URL
+  }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as users;
+    console.log(user);
+    const result = await usersService.loginUserAccount(user, {}, OauthServices.LINKEDIN);
+    return res.status(201).json(SUCCESS(result));
+  }
+);
+
+// router.get(
+//   "/auth/linkedin",
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     console.log("Some string");
+//     res.send("Something");
+//   }
+// );
 
 // create new user
 router.post(
@@ -127,7 +152,7 @@ router.post(
 // login
 router.post(
   "/login/authKey",
-  async(req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { body } = req;
 
@@ -136,7 +161,7 @@ router.post(
       const result = await usersService.loginUserAccountAuthKey(body);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      next (e);
+      next(e);
     }
   }
 )
@@ -152,12 +177,12 @@ router.put(
       await ChangePasswordSchema.validateAsync(body);
       const { token, email, password } = body;
 
-      const result = await usersService.changePassword(token, email, password );
+      const result = await usersService.changePassword(token, email, password);
 
       return res.status(201).json(SUCCESS(result));
 
-    } catch(e) {
-      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       next(e);
     }
   }
@@ -181,8 +206,8 @@ router.put(
 
       return res.status(200).json(SUCCESS(result));
 
-    } catch(e) {
-      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       return res.status(400).json(ERROR(e));
     }
   }
@@ -203,8 +228,8 @@ router.post(
 
       return res.status(201).json(SUCCESS(result));
 
-    } catch(e) {
-      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       next(e);
     }
   }
@@ -212,18 +237,18 @@ router.post(
 
 // request new email otp
 router.post(
-  "/otp/:user_id", 
-  async(req: Request, res: Response, next: NextFunction) => {
+  "/otp/:user_id",
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-      const {params} = req;
-      const {user_id} = params;
+      const { params } = req;
+      const { user_id } = params;
 
       const result = await usersService.regenerateLoginOTP(user_id as unknown as ObjectId);
       return res.status(201).json(SUCCESS(result));
 
-    } catch(e) {
-      if(process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!",e);
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!", e);
       next(e);
     }
   }
@@ -243,7 +268,7 @@ router.get("/me", validateUserAccess, async (req: Request, res: Response, next: 
     return res.status(201).json(SUCCESS(await usersService.findByUserId(_id as unknown as string)));
 
   } catch (e) {
-    if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
     next(e);
   }
 
