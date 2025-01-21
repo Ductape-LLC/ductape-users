@@ -66,6 +66,7 @@ jobs:
             "GIT_CLIENT_SECRET_VALUE": "${{ secrets.GIT_CLIENT_SECRET }}",
             "LINKEDIN_CLIENT_ID_VALUE": "${{ secrets.LINKEDIN_CLIENT_ID }}",
             "LINKEDIN_CLIENT_SECRET_VALUE": "${{ secrets.LINKEDIN_CLIENT_SECRET }}",
+            "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}",
             "DUCTAPE_SIGNIN_URL_VALUE": "${{ secrets.DUCTAPE_SIGNIN_URL }}"
             }'
 

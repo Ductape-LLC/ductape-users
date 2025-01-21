@@ -65,6 +65,10 @@
           "value": "LINKEDIN_CLIENT_SECRET_VALUE"
         },
         {
+          "name": "USER_SERVICE",
+          "value": "USER_SERVICE_VALUE"
+        },
+        {
           "name": "DUCTAPE_SIGNIN_URL",
           "value": "DUCTAPE_SIGNIN_URL_VALUE"
         }
