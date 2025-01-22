@@ -39,6 +39,38 @@
         {
           "name": "DEVELOPER_SERVICE",
           "value": "DEVELOPER_SERVICE_VALUE"
+        },
+        {
+          "name": "GOOGLE_CLIENT_ID",
+          "value": "GOOGLE_CLIENT_ID_VALUE"
+        },
+        {
+          "name": "GOOGLE_CLIENT_SECRET",
+          "value": "GOOGLE_CLIENT_SECRET_VALUE"
+        },
+        {
+          "name": "GIT_CLIENT_ID",
+          "value": "GIT_CLIENT_ID_VALUE"
+        },
+        {
+          "name": "GIT_CLIENT_SECRET",
+          "value": "GIT_CLIENT_SECRET_VALUE"
+        },
+        {
+          "name": "LINKEDIN_CLIENT_ID",
+          "value": "LINKEDIN_CLIENT_ID_VALUE"
+        },
+        {
+          "name": "LINKEDIN_CLIENT_SECRET",
+          "value": "LINKEDIN_CLIENT_SECRET_VALUE"
+        },
+        {
+          "name": "USER_SERVICE",
+          "value": "USER_SERVICE_VALUE"
+        },
+        {
+          "name": "DUCTAPE_SIGNIN_URL",
+          "value": "DUCTAPE_SIGNIN_URL_VALUE"
         }
       ],
       "environmentFiles": [],

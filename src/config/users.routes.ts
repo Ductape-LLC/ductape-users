@@ -3,19 +3,81 @@ import UsersService from "../services/users.service";
 import SUCCESS from "../commons/successResponse";
 import ERROR from "../commons/errorResponse";
 import UserSchema from "../validators/users.validator.create";
+import UserUpdateSchema from "../validators/users.validator.update";
 import TemporaryUserSchema from "../validators/users.validator.temporaryuser";
 import ChangePasswordSchema from "../validators/users.validator.changepassword";
+import changePasswordSchema from "../validators/users.validator.change-password";
 import LoginSchema from "../validators/users.validator.login";
 import OTPLoginSchema from "../validators/users.validator.otplogin";
 import AuthKeyLoginSchema from "../validators/users.validator.authkeylogin";
 import ForgotSchema from "../validators/users.validators.forgotpassword";
 import { extractError, stripAuth } from "../utils/users.utils.string";
-import { genericErrors } from "../types/users.type";
+import { genericErrors, OauthServices, users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
+import { validateUserAccess } from "../middleware/users.middleware.access";
+import passport from 'passport';
+import '../passports/google.passport';
+import '../passports/github.passport';
+import '../passports/linkedIn.passport';
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 const router = Router();
 const usersService = new UsersService();
+
+
+// OAuth Services
+router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+router.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { session: false, failureRedirect: process.env.DUCTAPE_SIGNIN_URL }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as users;
+
+    const result = await usersService.loginUserAccount(user, {}, OauthServices.GOOGLE);
+    return res.status(201).json(SUCCESS(result));
+  }
+);
+
+router.get('/auth/github', passport.authenticate('github', { scope: ['user:email'] }));
+
+router.get(
+  '/auth/github/callback',
+  passport.authenticate('github', { session: false, failureRedirect: process.env.DUCTAPE_SIGNIN_URL }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as users;
+
+    const result = await usersService.loginUserAccount(user, {}, OauthServices.GITHUB);
+    return res.status(201).json(SUCCESS(result));
+  }
+);
+
+router.get('/auth/linkedin', passport.authenticate('linkedin', { scope: ['openid', 'profile', 'email'], }));
+
+router.get(
+  '/auth/linkedin/callback',
+  passport.authenticate('linkedin', {
+    session: false,
+    failureRedirect: process.env.DUCTAPE_SIGNIN_URL
+  }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user as users;
+    console.log(user);
+    const result = await usersService.loginUserAccount(user, {}, OauthServices.LINKEDIN);
+    return res.status(201).json(SUCCESS(result));
+  }
+);
+
+// router.get(
+//   "/auth/linkedin",
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     console.log("Some string");
+//     res.send("Something");
+//   }
+// );
 
 // create new user
 router.post(
@@ -34,7 +96,27 @@ router.post(
   }
 );
 
-// Create Temporary User
+router.patch(
+  "/update",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { body, user } = req;
+      const { _id } = user as users
+
+
+      await UserUpdateSchema.validateAsync(body);
+      const result = await usersService.updateUserAccount(body, _id as unknown as string);
+
+      return res.status(201).json(SUCCESS(result));
+    } catch (e) {
+      console.log(e)
+      next(e);
+    }
+  }
+);
+
+
 router.post(
   "/create-temporary-user",
   validateModuleRequest,
@@ -70,7 +152,7 @@ router.post(
 // login
 router.post(
   "/login/authKey",
-  async(req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { body } = req;
 
@@ -79,7 +161,7 @@ router.post(
       const result = await usersService.loginUserAccountAuthKey(body);
       return res.status(201).json(SUCCESS(result));
     } catch (e) {
-      next (e);
+      next(e);
     }
   }
 )
@@ -95,18 +177,43 @@ router.put(
       await ChangePasswordSchema.validateAsync(body);
       const { token, email, password } = body;
 
-      const result = await usersService.changePassword(token, email, password );
+      const result = await usersService.changePassword(token, email, password);
 
       return res.status(201).json(SUCCESS(result));
 
-    } catch(e) {
-      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       next(e);
     }
   }
 )
 
-// login with otp
+router.put(
+  "/change-password",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { body, user } = req;
+      const { email } = user as users
+
+      await changePasswordSchema.validateAsync(body);
+
+      const { oldPassword, newPassword, confirmNewPassword } = body;
+
+      if (newPassword !== confirmNewPassword) throw 'Passwords do not match.';
+
+      const result = await usersService.changeUserPassword(email, oldPassword, newPassword);
+
+      return res.status(200).json(SUCCESS(result));
+
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+      return res.status(400).json(ERROR(e));
+    }
+  }
+)
+
+
 router.post(
   "/login/otp",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -121,8 +228,8 @@ router.post(
 
       return res.status(201).json(SUCCESS(result));
 
-    } catch(e) {
-      if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       next(e);
     }
   }
@@ -130,18 +237,18 @@ router.post(
 
 // request new email otp
 router.post(
-  "/otp/:user_id", 
-  async(req: Request, res: Response, next: NextFunction) => {
+  "/otp/:user_id",
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
 
-      const {params} = req;
-      const {user_id} = params;
+      const { params } = req;
+      const { user_id } = params;
 
       const result = await usersService.regenerateLoginOTP(user_id as unknown as ObjectId);
       return res.status(201).json(SUCCESS(result));
 
-    } catch(e) {
-      if(process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!",e);
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!", e);
       next(e);
     }
   }
@@ -149,28 +256,19 @@ router.post(
 
 
 // fetch information of token holder
-router.get("/me", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/me", validateUserAccess, async (req: Request, res: Response, next: NextFunction) => {
 
   try {
 
-    const { body, query, params } = req;
-    const auth_token = req.headers["x-access-token"] as string || req.headers["authorization"] as string;
+    const { user } = req;
+    const { _id } = user as users
 
-    if (!auth_token) return res.status(401).json(ERROR("Missing Auth Token"));
+    console.log(_id)
 
-    const token = stripAuth(auth_token);
-    let { public_key, user_id } = body;
-
-    if (!user_id) user_id = params.user_id || query.user_id;
-    if (!public_key) public_key = params.public_key || query.public_key;
-
-
-    await usersService.validatePublicKeyJWT(token, user_id, public_key);
-
-    return res.status(201).json(SUCCESS(await usersService.findByUserId(user_id)));
+    return res.status(201).json(SUCCESS(await usersService.findByUserId(_id as unknown as string)));
 
   } catch (e) {
-    if(process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
     next(e);
   }
 

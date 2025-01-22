@@ -32,7 +32,9 @@ jobs:
           sudo swapoff -a
           sudo rm -f /swapfile
           sudo apt clean
-          docker rmi $(docker image ls -aq)
+
+          docker system prune -af
+
           df -h
 
       - name: Build, Tag and Push the Image to Amazon ECR
@@ -57,7 +59,15 @@ jobs:
             "DB_HOST_VALUE": "${{ secrets.DB_HOST }}",
             "EMAIL_SERVICE_VALUE": "${{ secrets.EMAIL_SERVICE }}",
             "DEVELOPER_SERVICE_VALUE": "${{ secrets.DEVELOPER_SERVICE }}",
-            "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}"
+            "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}",
+            "GOOGLE_CLIENT_ID_VALUE": "${{ secrets.GOOGLE_CLIENT_ID }}",
+            "GOOGLE_CLIENT_SECRET_VALUE": "${{ secrets.GOOGLE_CLIENT_SECRET }}",
+            "GIT_CLIENT_ID_VALUE": "${{ secrets.GIT_CLIENT_ID }}",
+            "GIT_CLIENT_SECRET_VALUE": "${{ secrets.GIT_CLIENT_SECRET }}",
+            "LINKEDIN_CLIENT_ID_VALUE": "${{ secrets.LINKEDIN_CLIENT_ID }}",
+            "LINKEDIN_CLIENT_SECRET_VALUE": "${{ secrets.LINKEDIN_CLIENT_SECRET }}",
+            "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}",
+            "DUCTAPE_SIGNIN_URL_VALUE": "${{ secrets.DUCTAPE_SIGNIN_URL }}"
             }'
 
       - name: Print Task Definition

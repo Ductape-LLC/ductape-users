@@ -16,6 +16,7 @@ export interface IUsersRepo {
     updateMany(get: unknown, set: Partial<users>): Promise<boolean>;
     fetchById(get: unknown): Promise<users>;
     fetchByEmail(email: string): Promise<users>;
+    fetchTempUser(payload: users): Promise<users>;
     getTemporaryUser(email: string): Promise<users>;
     fetchByIdReturnPrivateKey(id: ObjectId): Promise<users>;
     fetchByPrivateKey(payload: AuthKeyLoginPayload): Promise<users>;
@@ -128,13 +129,14 @@ export const UsersRepo: IUsersRepo = {
     },
     async login(payload: Partial<users>): Promise<users> {
         try {
-            const { email, password: raw } = payload
+            const { email, password: raw, oauth_service } = payload;
             const password = sha256(raw as string);
+            let match: { email: string | undefined, password?: string } = { email };
+            if (!oauth_service) {
+                match.password = password;
+            }
             const userData = await fetchUser([{
-                $match: {
-                    email,
-                    password
-                }
+                $match: match
             }, {
                 $lookup: {
                     from: "workspace_accesses",
@@ -216,6 +218,11 @@ export const UsersRepo: IUsersRepo = {
 
         const userData = await fetchUser([{ $match: { email } }]);
         const user = cleanUserData(userData);
+        return user;
+    },
+    async fetchTempUser(payload: users): Promise<users> {
+
+        const user = await fetchTemporaryUser([{ $match: { ...payload } }]);
         return user;
     },
     async getTemporaryUser(email: string): Promise<users> {

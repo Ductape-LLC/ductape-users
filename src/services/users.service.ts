@@ -2,14 +2,14 @@ import EVENTBROKER from '../events';
 import { ConfirmRepo, IConfirmRepo } from '../repo/confirm.repo';
 import { AuthRepo, IAuthRepo } from '../repo/auth.repo';
 import { UsersRepo, IUsersRepo } from '../repo/users.repo';
-import { AuthKeyLoginPayload, otp_types, users } from '../types/users.type';
+import { AuthKeyLoginPayload, OauthServices, otp_types, users } from '../types/users.type';
 import { EventType, UserStatus } from '../events/user.events.types';
 import { ObjectId } from 'mongoose';
 import { confirmUser } from '../types/confirm.type';
 import { ForgotRepo, IForgotRepo } from '../repo/forgot.repo';
 import { IOTPRepo, OTPRepo } from '../repo/otp.repo';
 import sha256 from 'crypto-js/sha256';
-import { handleError } from '../errors/errors';
+import { handleError, NotFoundError } from '../errors/errors';
 
 export interface IUsersService {
   createUserAccount(payload: users): Promise<users>;
@@ -33,12 +33,12 @@ export default class UsersService implements IUsersService {
     this.OTPRepo = OTPRepo;
   }
 
-  async createUserAccount(payload: users): Promise<users> {
-    let user = await this.UserRepo.getTemporaryUser(payload.email)
+  async createUserAccount(payload: Partial<users>): Promise<users> {
+    let user = await this.UserRepo.getTemporaryUser(payload.email as string)
     if (user && user.status === UserStatus.TEMPORARY){
       user = await this.UserRepo.updateTemporaryUser(user._id, payload)
     } else {
-      user = await this.UserRepo.create(payload);
+      user = await this.UserRepo.create(payload as users);
     }
     const confirm = await this.ConfirmRepo.create(user);
     const { _id: confirm_id, token } = confirm;
@@ -47,13 +47,31 @@ export default class UsersService implements IUsersService {
     return user
   }
 
+  async updateUserAccount(payload: users, id: string): Promise<users> {
+    let user = await this.findByUserId(id)
+    if (!user) throw new NotFoundError('user')
+      
+    const result = await this.UserRepo.updateOne(id, payload);
+    user = await this.findByUserId(id)
+    return user
+  }
+
   async createTemporary(payload: users): Promise<users> {
+    const _user = await this.UserRepo.fetchTempUser(payload)
+    if (_user) return _user
     const user = await this.UserRepo.createTemporaryUser(payload);
     return user;
   }
 
-  async loginUserAccount(payload: Partial<users>, query: { private_key?: boolean }): Promise<users> {
+  async loginUserAccount(payload: Partial<users>, query: { private_key?: boolean }, oauth_service? : OauthServices): Promise<users> {
     try {
+      
+      if (oauth_service){
+        Object.assign(payload, {
+          oauth_service
+        })
+      }
+
       const userData = await this.UserRepo.login(payload);
 
       const { private_key, otp } = userData;
@@ -238,6 +256,19 @@ export default class UsersService implements IUsersService {
     } catch (e) {
       throw handleError(e);
     }
+  }
+
+  async changeUserPassword(email: string, oldPassword: string, newPassword: string): Promise<boolean> {
+    const user = await this.UserRepo.fetchByEmail(email);
+
+    if (!user) throw 'Email does not exist';
+
+    const isPasswordValid = sha256(oldPassword).toString() === user.password;
+    if (!isPasswordValid) throw 'Current password is incorrect'
+
+    await this.UserRepo.updateOne(user._id, { password: sha256(newPassword).toString() });
+
+    return true;
   }
 
   async validatePublicKeyJWT(token: string, user_id: ObjectId, public_key: string): Promise<unknown> {

@@ -25,7 +25,12 @@ export interface users {
     active: boolean;
     workspaces?: Array<any>;
     permissions?: Array<string>;
-    status?: string
+    status?: string;
+    profilePicture?: string;
+    googleId?: string;
+    githubId?: string;
+    linkedinId: string;
+    oauth_service?: string;
 };
 
 export interface genericErrors { code?: number, _original: unknown, details: [{ message: string }] }
@@ -35,13 +40,22 @@ export enum otp_types {
     GOOGLE_AUTH = "google"
 }
 
+export enum OauthServices {
+    GOOGLE = "google",
+    GITHUB = "github",
+    LINKEDIN = "linkedIn"
+}
+
 export interface otp_login {
     user_id: string;
     token: string;
 }
 
 export interface change_password {
-    email: string;
-    password: string;
-    token: string;
+    email?: string;
+    password?: string;
+    token?: string;
+    oldPassword?: string;
+    newPassword?: string;
+    confirmNewPassword?: string;
 }
