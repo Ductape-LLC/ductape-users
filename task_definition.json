@@ -69,6 +69,10 @@
           "value": "USER_SERVICE_VALUE"
         },
         {
+          "name": "LOGIN_ENC_KEY",
+          "value": "LOGIN_ENC_KEY_VALUE"
+        },
+        {
           "name": "DUCTAPE_SIGNIN_URL",
           "value": "DUCTAPE_SIGNIN_URL_VALUE"
         }

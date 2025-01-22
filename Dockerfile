@@ -7,6 +7,10 @@ COPY package*.json ./
 
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
+# Install Python, make, gcc, musl-dev, expat-dev, and libxml2-dev
+RUN apk add --no-cache python3 make gcc musl-dev expat-dev libxml2-dev g++
+ENV PYTHON=/usr/bin/python3
+
 # Install Dependencies
 RUN npm i
 
