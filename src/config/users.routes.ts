@@ -16,6 +16,7 @@ import { genericErrors, OauthServices, users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
 import { validateUserAccess } from "../middleware/users.middleware.access";
+import {encrypt} from "ductape-sdk/dist/processor/utils/processor.utils";
 import passport from 'passport';
 import '../passports/google.passport';
 import '../passports/github.passport';
@@ -38,7 +39,12 @@ router.get(
     const user = req.user as users;
 
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GOOGLE);
-    return res.status(201).json(SUCCESS(result));
+    if(result) {
+      const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
+      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
+    }else {
+      return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
+    }
   }
 );
 
@@ -51,7 +57,12 @@ router.get(
     const user = req.user as users;
 
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GITHUB);
-    return res.status(201).json(SUCCESS(result));
+    if(result) {
+      const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
+      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
+    }else {
+      return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
+    }
   }
 );
 
@@ -67,7 +78,12 @@ router.get(
     const user = req.user as users;
     console.log(user);
     const result = await usersService.loginUserAccount(user, {}, OauthServices.LINKEDIN);
-    return res.status(201).json(SUCCESS(result));
+    if(result) {
+      const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
+      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
+    }else {
+      return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
+    }
   }
 );
 
