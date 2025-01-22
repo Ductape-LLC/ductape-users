@@ -41,7 +41,7 @@ router.get(
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GOOGLE);
     if(result) {
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
-      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}&key=${process.env.LOGIN_ENC_KEY}`)
+      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
     }else {
       return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
     }
@@ -59,7 +59,7 @@ router.get(
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GITHUB);
     if(result) {
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
-      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}&key=${process.env.LOGIN_ENC_KEY}`)
+      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
     }else {
       return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
     }
@@ -80,7 +80,7 @@ router.get(
     const result = await usersService.loginUserAccount(user, {}, OauthServices.LINKEDIN);
     if(result) {
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
-      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}&key=${process.env.LOGIN_ENC_KEY}`)
+      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
     }else {
       return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
     }
