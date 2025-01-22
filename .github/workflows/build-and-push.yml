@@ -68,7 +68,7 @@ jobs:
             "LINKEDIN_CLIENT_SECRET_VALUE": "${{ secrets.LINKEDIN_CLIENT_SECRET }}",
             "USER_SERVICE_VALUE": "${{ secrets.USER_SERVICE }}",
             "LOGIN_ENC_KEY_VALUE": "${{ secrets.LOGIN_ENC_KEY }}",
-            "DUCTAPE_SIGNIN_URL_VALUE": "${{ secrets.DUCTAPE_SIGNIN_URL }}",
+            "DUCTAPE_SIGNIN_URL_VALUE": "${{ secrets.DUCTAPE_SIGNIN_URL }}"
             }'
 
       - name: Print Task Definition
