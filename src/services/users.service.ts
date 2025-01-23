@@ -10,6 +10,7 @@ import { ForgotRepo, IForgotRepo } from '../repo/forgot.repo';
 import { IOTPRepo, OTPRepo } from '../repo/otp.repo';
 import sha256 from 'crypto-js/sha256';
 import { handleError, NotFoundError } from '../errors/errors';
+import { comparePasswords, hashPassword } from '../utils/users.utils.string';
 
 export interface IUsersService {
   createUserAccount(payload: users): Promise<users>;
@@ -35,7 +36,7 @@ export default class UsersService implements IUsersService {
 
   async createUserAccount(payload: Partial<users>): Promise<users> {
     let user = await this.UserRepo.getTemporaryUser(payload.email as string)
-    if (user && user.status === UserStatus.TEMPORARY){
+    if (user && user.status === UserStatus.TEMPORARY) {
       user = await this.UserRepo.updateTemporaryUser(user._id, payload)
     } else {
       user = await this.UserRepo.create(payload as users);
@@ -50,7 +51,7 @@ export default class UsersService implements IUsersService {
   async updateUserAccount(payload: users, id: string): Promise<users> {
     let user = await this.findByUserId(id)
     if (!user) throw new NotFoundError('user')
-      
+
     const result = await this.UserRepo.updateOne(id, payload);
     user = await this.findByUserId(id)
     return user
@@ -63,10 +64,10 @@ export default class UsersService implements IUsersService {
     return user;
   }
 
-  async loginUserAccount(payload: Partial<users>, query: { private_key?: boolean }, oauth_service? : OauthServices): Promise<users> {
+  async loginUserAccount(payload: Partial<users>, query: { private_key?: boolean }, oauth_service?: OauthServices): Promise<users> {
     try {
-      
-      if (oauth_service){
+
+      if (oauth_service) {
         Object.assign(payload, {
           oauth_service
         })
@@ -251,7 +252,7 @@ export default class UsersService implements IUsersService {
         await this.ForgotRepo.updateOne(forgot_id, { status: true });
       }
 
-      await this.UserRepo.updateOne(user_id, { password: sha256(password).toString() });
+      await this.UserRepo.updateOne(user_id, { password: await hashPassword(password) });
       return true;
     } catch (e) {
       throw handleError(e);
@@ -263,10 +264,10 @@ export default class UsersService implements IUsersService {
 
     if (!user) throw 'Email does not exist';
 
-    const isPasswordValid = sha256(oldPassword).toString() === user.password;
+    const isPasswordValid = await comparePasswords(oldPassword, user.password as string);
     if (!isPasswordValid) throw 'Current password is incorrect'
 
-    await this.UserRepo.updateOne(user._id, { password: sha256(newPassword).toString() });
+    await this.UserRepo.updateOne(user._id, { password: await hashPassword(newPassword) });
 
     return true;
   }

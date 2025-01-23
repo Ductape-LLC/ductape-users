@@ -4,7 +4,7 @@ import { model } from "../models/users.model";
 import { users } from "../types/users.type";
 import { handleError, UserError } from "../errors/errors";
 import { cleanUserData } from "./users.utils.read";
-import { sha256 } from "./users.utils.string";
+import { hashPassword, sha256 } from "./users.utils.string";
 import { UserStatus } from "../events/user.events.types";
 
 export const updateUser =async (id: unknown, set: Partial<users>): Promise<boolean> => {
@@ -33,7 +33,7 @@ export const updateTemporayUsers = async(id: string, payload: Partial<users>): P
     try{
 
         const { password } = payload;
-        payload.password = sha256(password as unknown as string);
+        payload.password = await hashPassword(password as string);
         payload.private_key = uuid();
         const create = await model.findByIdAndUpdate(id, {$set: {...payload, status: UserStatus.ACTIVE}});;
 
