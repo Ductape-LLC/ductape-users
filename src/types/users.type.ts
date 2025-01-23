@@ -12,7 +12,7 @@ export interface users {
     firstname: string;
     lastname: string;
     email: string;
-    password: string;
+    password?: string;
     dp?: string;
     bio?: string;
     otp?: {
