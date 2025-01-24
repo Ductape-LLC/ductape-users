@@ -15,6 +15,8 @@ export const AuthRepo: IAuthRepo = {
     },
     async validateModuleAuthJWT(jwt: string): Promise<unknown> {
         try {
+
+            console.log("JEGBEFUN", jwt, process.env.ENC_KEY);
             return JWT.verify(jwt, process.env.ENC_KEY as string);
         } catch (e) {
             throw handleError(e);

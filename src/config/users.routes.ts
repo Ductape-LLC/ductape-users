@@ -28,6 +28,11 @@ dotenv.config();
 const router = Router();
 const usersService = new UsersService();
 
+let baseurl = "http://localhost:5173";
+
+if(process.env.NODE_ENV!=="development") {
+  baseurl = "https://cloud.ductape.app";
+}
 
 // OAuth Services
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -40,10 +45,11 @@ router.get(
 
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GOOGLE);
     if(result) {
+      console.log(process.env.LOGIN_ENC_KEY);
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
-      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
+      return res.redirect(302, `${baseurl}/auth/login?loggedIn=true&token=${encryptedSessionData}`)
     }else {
-      return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
+      return res.redirect(302, `${baseurl}/auth/login?loggedIn=false`);
     }
   }
 );
@@ -59,9 +65,9 @@ router.get(
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GITHUB);
     if(result) {
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
-      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
+      return res.redirect(302, `${baseurl}/auth/login?loggedIn=true&token=${encryptedSessionData}`)
     }else {
-      return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
+      return res.redirect(302, `${baseurl}/auth/login?loggedIn=false`);
     }
   }
 );
@@ -80,9 +86,9 @@ router.get(
     const result = await usersService.loginUserAccount(user, {}, OauthServices.LINKEDIN);
     if(result) {
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
-      return res.redirect(302, `https://cloud.ductape.app/auth/login?loggedIn=true&token=${encryptedSessionData}`)
+      return res.redirect(302, `${baseurl}/auth/login?loggedIn=true&token=${encryptedSessionData}`)
     }else {
-      return res.redirect(302, "https://cloud.ductape.app/auth/login?loggedIn=false");
+      return res.redirect(302, `${baseurl}/auth/login?loggedIn=false`);
     }
   }
 );
@@ -333,7 +339,7 @@ router.get(
 // validate other domains access
 router.post(
   "/validate/access",
-  validateModuleRequest,
+  //validateModuleRequest,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
 
