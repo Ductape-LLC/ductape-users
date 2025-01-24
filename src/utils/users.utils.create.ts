@@ -2,14 +2,14 @@ import { uuid } from "uuidv4";
 import { model } from "../models/users.model";
 import { users } from "../types/users.type";
 import { cleanUserData, HmacSha1 } from "./users.utils.read";
-import { sha256 } from "./users.utils.string";
+import { hashPassword, sha256 } from "./users.utils.string";
 import { handleError, UserError } from "../errors/errors";
 
 export const createUsers = async(payload: users): Promise<users> =>{
     try{
 
         const { password } = payload;
-        payload.password = sha256(password);
+        payload.password = await hashPassword(password as string);
         payload.private_key = uuid();
         const create = await model.create(payload);
 

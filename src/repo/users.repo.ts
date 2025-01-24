@@ -2,9 +2,9 @@ import { cleanUserData, fetchUser, fetchUserById, generatePublicKey, fetchTempor
 import { AuthKeyLoginPayload, users } from "../types/users.type"
 import { createUsers, createTemporayUsers } from "../utils/users.utils.create";
 import { updateUser, updateMultipleUsers, updateTemporayUsers } from "../utils/users.utils.update";
-import { sha256 } from "../utils/users.utils.string";
+import { comparePasswords, sha256 } from "../utils/users.utils.string";
 import mongoose, { ObjectId } from "mongoose";
-import { ActionNotAllow, handleError } from "../errors/errors";
+import { ActionNotAllow, handleError, UserError } from "../errors/errors";
 import { UserStatus } from "../events/user.events.types";
 
 export interface IUsersRepo {
@@ -80,7 +80,7 @@ export const UsersRepo: IUsersRepo = {
                 }
             },
             {
-                $unwind:{
+                $unwind: {
                     path: "$workspaceInfo", // Unwind the array created by $lookup
                     preserveNullAndEmptyArrays: true
                 }
@@ -109,16 +109,16 @@ export const UsersRepo: IUsersRepo = {
 
             // const { private_key } = userData;
             const user = cleanUserData(userData);
-            
+
             let validWorkspace = false;
 
-            user.workspaces?.map((data)=> {
+            user.workspaces?.map((data) => {
                 console.log(workspace_id, data.workspace_id);
                 if (String(data.workspace_id) === workspace_id) validWorkspace = true;
             })
 
 
-            if(!validWorkspace) throw new ActionNotAllow()
+            if (!validWorkspace) throw new ActionNotAllow()
 
             return { ...user }
 
@@ -130,11 +130,10 @@ export const UsersRepo: IUsersRepo = {
     async login(payload: Partial<users>): Promise<users> {
         try {
             const { email, password: raw, oauth_service } = payload;
-            const password = sha256(raw as string);
-            let match: { email: string | undefined, password?: string } = { email };
-            if (!oauth_service) {
-                match.password = password;
+            if (!email || (!raw && !oauth_service)) {
+                throw new UserError("Email and password are required", 400);
             }
+            let match: { email: string | undefined, password?: string } = { email };
             const userData = await fetchUser([{
                 $match: match
             }, {
@@ -160,7 +159,7 @@ export const UsersRepo: IUsersRepo = {
                 }
             },
             {
-                $unwind:{
+                $unwind: {
                     path: "$workspaceInfo", // Unwind the array created by $lookup
                     preserveNullAndEmptyArrays: true
                 }
@@ -187,12 +186,22 @@ export const UsersRepo: IUsersRepo = {
                 }
             }], "login");
 
+            if (!userData) {
+                throw new UserError("Invalid email or password.", 401);
+            }
+
             console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
+
+            if (!oauth_service) {
+                const isPasswordMatch = await comparePasswords(raw as string, userData.password as string);
+                if (!isPasswordMatch) {
+                    throw new UserError("Invalid email or password.", 401);
+                }
+            }
 
             const { private_key } = userData;
             const user = cleanUserData(userData);
-            user.password = password;
-
+            delete user.password;
             return { ...user, private_key }
 
         } catch (e) {
