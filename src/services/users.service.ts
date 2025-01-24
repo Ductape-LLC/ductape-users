@@ -210,7 +210,7 @@ export default class UsersService implements IUsersService {
     }
   }
 
-  async generateResetUserPassword(email: string): Promise<boolean> {
+  async generateResetUserPassword(email: string): Promise<string> {
     try {
       const user = await this.UserRepo.fetchByEmail(email);
 
@@ -224,7 +224,7 @@ export default class UsersService implements IUsersService {
       if (process.env.NODE_ENV !== 'production') console.log('event broker init');
       EVENTBROKER({ event: EventType.FORGOT_EMAIL, data: { user, token, forgot_id: _id, auth } });
 
-      return true;
+      return "An OTP has been sent to your mail to reset your password";
     } catch (e) {
       throw handleError(e);
     }
