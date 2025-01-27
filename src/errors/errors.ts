@@ -26,8 +26,8 @@ export class UserError extends Error implements ErrorWithHttpCode {
 export class SystemError extends Error {
   code: number;
 
-  constructor() {
-    super("unable to process request at this time");
+  constructor(error?: string) {
+    super(error || "unable to process request at this time");
     this.code = 500;
   }
 }
@@ -121,7 +121,8 @@ export function handleError(error: unknown): UserError | AxiosErr | SystemError 
 
     return new AxiosErr(errMsg, code);
   }
-  return new SystemError();
+
+  return new SystemError(error as string);
 }
 
 export function sendErrorResponse(res: Response, error: UserError): void {

@@ -177,6 +177,7 @@ export const UsersRepo: IUsersRepo = {
                     lastname: { $first: "$lastname" },
                     email: { $first: "$email" },
                     password: { $first: "$password" },
+                    otp: { $first: "$otp" },
                     active: { $first: "$active" },
                     created: { $first: "$created" },
                     __v: { $first: "$__v" },

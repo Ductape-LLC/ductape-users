@@ -98,6 +98,7 @@ export default class UsersService implements IUsersService {
           const { _id: otp_id, token } = otp;
           EVENTBROKER({ event: EventType.SEND_OTP, data: { user: userData, token, otp_id, auth } });
         }
+        delete userData.otp;
         return { ...userData };
       }
     } catch (e) {
