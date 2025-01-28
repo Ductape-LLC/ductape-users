@@ -161,7 +161,7 @@ export default class UsersService implements IUsersService {
     }
   }
 
-  async regenerateLoginOTP(user_id: ObjectId): Promise<boolean> {
+  async regenerateLoginOTP(user_id: ObjectId): Promise<string> {
     try {
       const user = await this.UserRepo.fetchById(user_id);
 
@@ -172,7 +172,7 @@ export default class UsersService implements IUsersService {
       const { _id: otp_id, token } = otp;
       EVENTBROKER({ event: EventType.SEND_OTP, data: { user, token, otp_id, auth } });
 
-      return true;
+      return "OTP successfully sent";
     } catch (e) {
       throw handleError(e);
     }
@@ -260,7 +260,7 @@ export default class UsersService implements IUsersService {
     }
   }
 
-  async changeUserPassword(email: string, oldPassword: string, newPassword: string): Promise<boolean> {
+  async changeUserPassword(email: string, oldPassword: string, newPassword: string): Promise<string> {
     const user = await this.UserRepo.fetchByEmail(email);
 
     if (!user) throw 'Email does not exist';
@@ -270,7 +270,7 @@ export default class UsersService implements IUsersService {
 
     await this.UserRepo.updateOne(user._id, { password: await hashPassword(newPassword) });
 
-    return true;
+    return "Password successfully changed";
   }
 
   async validatePublicKeyJWT(token: string, user_id: ObjectId, public_key: string): Promise<unknown> {
