@@ -13,7 +13,7 @@ const port = process.env.PORT || 8002;
 
 dotEnv.config();
 
-app.use(urlRewrite);
+// app.use(urlRewrite);
 
 // Bodyparser
 app.use(express.json());
@@ -29,7 +29,7 @@ app.use(cors(options));
 
 app.use(router);
 
-app.get('/api/v1/status', (_req, res) => {
+app.get('/users/v1/status', (_req, res) => {
   res.send(`ductape-users-api is healthy`);
 });
 
@@ -40,7 +40,6 @@ mongoose.connect(process.env.DB_HOST as string).catch((e) => {
 mongoose.connection.on('open', () => {
   if (process.env.NODE_ENV !== 'production') console.log('Mongoose Connection');
 });
-
 
 // app.use(
 //     session({
@@ -61,4 +60,3 @@ app.listen(port, () => {
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   sendErrorResponse(res, err as UserError);
 });
-
