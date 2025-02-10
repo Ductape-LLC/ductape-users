@@ -13,7 +13,7 @@ const port = process.env.PORT || 8002;
 
 dotEnv.config();
 
-// app.use(urlRewrite);
+app.use(urlRewrite);
 
 // Bodyparser
 app.use(express.json());
