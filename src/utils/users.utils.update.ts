@@ -35,7 +35,7 @@ export const updateTemporayUsers = async(id: string, payload: Partial<users>): P
         const { password } = payload;
         payload.password = await hashPassword(password as string);
         payload.private_key = uuid();
-        const create = await model.findByIdAndUpdate(id, {$set: {...payload, status: UserStatus.ACTIVE}});;
+        const create = await model.findByIdAndUpdate(id, {$set: {...payload, status: UserStatus.ACTIVE}}, {new: true, upsert: true});;
 
         if(create){
             return cleanUserData(create.toObject());

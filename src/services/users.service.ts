@@ -75,7 +75,7 @@ export default class UsersService implements IUsersService {
 
       const userData = await this.UserRepo.login(payload);
 
-      const { private_key, otp } = userData;
+      const { private_key, otp, status } = userData;
 
       if (!query.private_key) {
         delete userData.private_key;
