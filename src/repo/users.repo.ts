@@ -199,7 +199,7 @@ export const UsersRepo: IUsersRepo = {
             console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
 
             if (!oauth_service) {
-                const isPasswordMatch = await comparePasswords(raw as string, userData.password as string);
+                const isPasswordMatch = await comparePasswords(raw as unknown as  string, userData.password as unknown as string);
                 if (!isPasswordMatch) {
                     throw new UserError("Invalid email or password.", 401);
                 }
