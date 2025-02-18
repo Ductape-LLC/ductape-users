@@ -174,6 +174,7 @@ export const UsersRepo: IUsersRepo = {
                 $group: {
                     _id: "$_id",
                     firstname: { $first: "$firstname" },
+                    status: { $first: "$status" },
                     lastname: { $first: "$lastname" },
                     email: { $first: "$email" },
                     password: { $first: "$password" },
@@ -191,10 +192,14 @@ export const UsersRepo: IUsersRepo = {
                 throw new UserError("Invalid email or password.", 401);
             }
 
+            if (userData.status === UserStatus.TEMPORARY) {
+                throw new UserError("This user is a temporary user please sign up", 401);
+            }
+
             console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
 
             if (!oauth_service) {
-                const isPasswordMatch = await comparePasswords(raw as string, userData.password as string);
+                const isPasswordMatch = await comparePasswords(raw as unknown as  string, userData.password as unknown as string);
                 if (!isPasswordMatch) {
                     throw new UserError("Invalid email or password.", 401);
                 }
