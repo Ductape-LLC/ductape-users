@@ -28,7 +28,7 @@ dotenv.config();
 const router = Router();
 const usersService = new UsersService();
 
-let baseurl = "http://localhost:5173";
+let baseurl = "https://cloud.ductape.app";
 
 if(process.env.NODE_ENV!=="development") {
   baseurl = "https://cloud.ductape.app";
