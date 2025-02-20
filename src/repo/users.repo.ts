@@ -130,9 +130,10 @@ export const UsersRepo: IUsersRepo = {
     async login(payload: Partial<users>): Promise<users> {
         try {
             const { email, password: raw, oauth_service } = payload;
-            if ((!email && !raw) || (!oauth_service)) {
+            if (!oauth_service && (!email || !raw)) {
                 throw new UserError("Email and password are required", 400);
             }
+            
             let match: { email: string | undefined, password?: string } = { email };
             const userData = await fetchUser([{
                 $match: match
@@ -198,11 +199,8 @@ export const UsersRepo: IUsersRepo = {
 
             console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
 
-            if (!oauth_service) {
-                const isPasswordMatch = await comparePasswords(raw as unknown as string, userData.password as unknown as string);
-                if (!isPasswordMatch) {
-                    throw new UserError("Invalid email or password.", 401);
-                }
+            if (!oauth_service && (!raw || !userData.password || !(await comparePasswords(raw, userData.password)))) {
+                throw new UserError("Invalid email or password.", 401);
             }
 
             const { private_key } = userData;
