@@ -130,9 +130,10 @@ export const UsersRepo: IUsersRepo = {
     async login(payload: Partial<users>): Promise<users> {
         try {
             const { email, password: raw, oauth_service } = payload;
-            if (!email || (!raw && !oauth_service)) {
+            if (!oauth_service && (!email || !raw)) {
                 throw new UserError("Email and password are required", 400);
             }
+            
             let match: { email: string | undefined, password?: string } = { email };
             const userData = await fetchUser([{
                 $match: match
@@ -174,9 +175,11 @@ export const UsersRepo: IUsersRepo = {
                 $group: {
                     _id: "$_id",
                     firstname: { $first: "$firstname" },
+                    status: { $first: "$status" },
                     lastname: { $first: "$lastname" },
                     email: { $first: "$email" },
                     password: { $first: "$password" },
+                    otp: { $first: "$otp" },
                     active: { $first: "$active" },
                     created: { $first: "$created" },
                     __v: { $first: "$__v" },
@@ -190,13 +193,14 @@ export const UsersRepo: IUsersRepo = {
                 throw new UserError("Invalid email or password.", 401);
             }
 
+            if (userData.status === UserStatus.TEMPORARY) {
+                throw new UserError("This user is a temporary user please sign up", 401);
+            }
+
             console.log("SAAARRRRRYYYYY!!!!", JSON.stringify(userData));
 
-            if (!oauth_service) {
-                const isPasswordMatch = await comparePasswords(raw as string, userData.password as string);
-                if (!isPasswordMatch) {
-                    throw new UserError("Invalid email or password.", 401);
-                }
+            if (!oauth_service && (!raw || !userData.password || !(await comparePasswords(raw, userData.password)))) {
+                throw new UserError("Invalid email or password.", 401);
             }
 
             const { private_key } = userData;
