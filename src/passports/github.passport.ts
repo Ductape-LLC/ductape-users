@@ -19,25 +19,34 @@ passport.use(
     async (accessToken: string, refreshToken: string, profile: Profile, done) => {
       const { id, emails, username } = profile;
       const email = emails?.[0].value;
-      const user = await UserModel.findOne({ $or: [{ githubId: id }, { email }] });
+      const user = await UserModel.findOne({ githubId: id });
 
       if (user) {
-        await UserModel.findByIdAndUpdate(
-          user._id,
-          { $set: { githubId: id } },
-          { new: true, upsert: true },
-        );
-        return done(null, user);
+        // await UserModel.findByIdAndUpdate(
+        //   user._id,
+        //   { $set: { githubId: id } },
+        //   { new: true, upsert: true },
+        // );
+        return done(null, user); // User found by Github Id
       } else {
-        const body = {
-          githubId: id,
-          firstname: username || '',
-          lastname: '',
-          email: email,
-          password: `${email}${id}`,
-        };
-        const user = await usersService.createUserAccount(body);
-        return done(null, user);
+        const existingUser = await UserModel.findOne({ email });
+        if (existingUser) {
+          // Link GitHub ID to existing user (caution: requires user consent)
+          existingUser.githubId = id;
+          await existingUser.save();
+          return done(null, existingUser);
+        } else {
+          const body = {
+            githubId: id,
+            firstname: username || '',
+            lastname: '',
+            email: email,
+            password: `${email}${id}`,
+          };
+          const user = await usersService.createUserAccount(body);
+          return done(null, user);
+        }
+
       }
     },
   ),
