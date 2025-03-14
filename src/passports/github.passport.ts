@@ -30,12 +30,12 @@ passport.use(
         return done(null, user); // User found by Github Id
       } else {
         const existingUser = await UserModel.findOne({ email });
-        if (existingUser) {
-          // Link GitHub ID to existing user (caution: requires user consent)
-          existingUser.githubId = id;
-          await existingUser.save();
-          return done(null, existingUser);
-        } else {
+        // if (existingUser) {
+        //   // Link GitHub ID to existing user (caution: requires user consent)
+        //   existingUser.githubId = id;
+        //   await existingUser.save();
+        //   return done(null, existingUser);
+        // } else {
           const body = {
             githubId: id,
             firstname: username || '',
@@ -45,8 +45,6 @@ passport.use(
           };
           const user = await usersService.createUserAccount(body);
           return done(null, user);
-        }
-
       }
     },
   ),
