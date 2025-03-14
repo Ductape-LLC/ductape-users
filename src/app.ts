@@ -7,6 +7,7 @@ import cors from 'cors';
 import { UserError, sendErrorResponse } from './errors/errors';
 import { urlRewrite } from './middleware/url-rewrite';
 import session from 'express-session';
+import { seedPermissions } from './seeders/permission.seeder';
 
 const app = express();
 const port = process.env.PORT || 8002;
@@ -33,29 +34,41 @@ app.get('/users/v1/status', (_req, res) => {
   res.send(`ductape-users-api is healthy`);
 });
 
-mongoose.connect(process.env.DB_HOST as string).catch((e) => {
-  if (process.env.NODE_ENV !== 'production') console.log(e);
-});
+async function initializeApp() {
+  try {
+    await mongoose.connect(process.env.DB_HOST as string).catch((e) => {
+      if (process.env.NODE_ENV !== 'production') console.log(e);
+    });
 
-mongoose.connection.on('open', () => {
-  if (process.env.NODE_ENV !== 'production') console.log('Mongoose Connection');
-});
+    await mongoose.connection.on('open', () => {
+      if (process.env.NODE_ENV !== 'production') console.log('Mongoose Connection');
+    });
 
-// app.use(
-//     session({
-//         secret: 'your_secret_key', // Replace with a strong secret key
-//         resave: false,
-//         saveUninitialized: true,
-//         cookie: { secure: false }, // Set to true if using HTTPS
-//     }),
-// );
+    // app.use(
+    //     session({
+    //         secret: 'your_secret_key', // Replace with a strong secret key
+    //         resave: false,
+    //         saveUninitialized: true,
+    //         cookie: { secure: false }, // Set to true if using HTTPS
+    //     }),
+    // );
 
-app.use(passport.initialize());
-// app.use(passport.session());
+    app.use(passport.initialize());
+    // app.use(passport.session());
 
-app.listen(port, () => {
-  if (process.env.NODE_ENV !== 'production') console.log(`ductape-users-api app is running on port ${port}.`);
-});
+    await seedPermissions();
+    console.log('Permissions seeded successfully');
+
+    app.listen(port, () => {
+      if (process.env.NODE_ENV !== 'production') console.log(`ductape-users-api app is running on port ${port}.`);
+    });
+  } catch (error) {
+    console.error('Failed to initialize application:', error);
+    process.exit(1);
+  }
+}
+
+initializeApp();
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   sendErrorResponse(res, err as UserError);

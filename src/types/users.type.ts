@@ -31,6 +31,7 @@ export interface users {
     githubId?: string;
     linkedinId: string;
     oauth_service?: string;
+    roles: Array<mongoose.Schema.Types.ObjectId>;
 };
 
 export interface genericErrors { code?: number, _original: unknown, details: [{ message: string }] }
