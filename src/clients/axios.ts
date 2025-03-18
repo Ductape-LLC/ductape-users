@@ -9,7 +9,6 @@ const requestInterceptor = async (config: { cancelToken: CancelToken; }) => {
 let instance: AxiosInstance;
 
 const client = (baseURL: string, auth: string, contentType: string) => {
-  if (instance) return instance;
   instance = axios.create({
     baseURL,
     timeout: 15000,

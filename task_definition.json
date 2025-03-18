@@ -75,6 +75,10 @@
         {
           "name": "DUCTAPE_SIGNIN_URL",
           "value": "DUCTAPE_SIGNIN_URL_VALUE"
+        },
+        {
+          "name": "PRICING_SERVICE",
+          "value": "PRICING_SERVICE_VALUE"
         }
       ],
       "environmentFiles": [],
