@@ -29,6 +29,9 @@ import UpdatePermissionSchema from "../validators/permissions.validator.update";
 import CreateRoleSchema from "../validators/roles.validator.create";
 import UpdateRoleSchema from "../validators/roles.validator.update";
 import { requirePermissions } from "../middleware/users.middleware.permissions";
+import PaystackService from "../services/paystack.service";
+import CustomerCreateSchema from "../validators/paystack-customer.validator.create"
+import { checkSubscriptionExpiration } from "../middleware/users.middleware.subscription";
 
 dotenv.config();
 
@@ -36,6 +39,7 @@ dotenv.config();
 const router = Router();
 const usersService = new UsersService();
 const permissionsService = new PermissionService();
+const paystackService = new PaystackService();
 
 let baseurl = "https://cloud.ductape.app";
 
@@ -485,6 +489,55 @@ router.delete('/roles/:id', validateUserAccess, requirePermissions([BasePermissi
     return res.status(500).json(ERROR(error.toString()));
   }
 })
+
+// PAYSTACK CUSTOMER
+
+router.post('/paystack/customer/:id', validateModuleRequest, async (req, res) => {
+  try {
+      const { body, params } = req;
+      const { id } = params;
+
+      await CustomerCreateSchema.validateAsync(body)
+      const customer = await paystackService.createCustomer({
+          ...body,
+          user_id: id
+      });
+      return res.status(201).json(SUCCESS(customer));
+  } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(400).json(ERROR(error.toString()));
+  }
+});
+
+router.get('/card/', validateUserAccess, async (req, res) => {
+  try {
+    const { user } = req;
+    const { _id: id } = user as users
+      if (!id || typeof id !== 'string') {
+        throw 'Invalid user or user ID';
+      }
+      const customer = await paystackService.getCustomerByUserId(id);
+      return res.status(200).json(SUCCESS(customer));
+  } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(400).json(ERROR(error.toString()));
+  }
+});
+
+router.delete('/card/', validateUserAccess, checkSubscriptionExpiration, async (req, res) => {
+  try {
+      const { user } = req;
+      const { _id: userId } = user as users
+      const deleted = await paystackService.deleteCustomer(userId as unknown as any);
+      return res.status(200).json(SUCCESS({
+          message: 'Card deleted successfully',
+          deleted
+      }));
+  } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(404).json(ERROR(error.toString()));
+  }
+});
 
 
 export default router;
