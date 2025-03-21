@@ -22,11 +22,24 @@ import '../passports/google.passport';
 import '../passports/github.passport';
 import '../passports/linkedIn.passport';
 import dotenv from 'dotenv';
+import PermissionService from "../services/permissions.service";
+import { BasePermissions, permissionType } from "../types/permission.type";
+import CreatePermissionSchema from "../validators/permissions.validator.create";
+import UpdatePermissionSchema from "../validators/permissions.validator.update";
+import CreateRoleSchema from "../validators/roles.validator.create";
+import UpdateRoleSchema from "../validators/roles.validator.update";
+import { requirePermissions } from "../middleware/users.middleware.permissions";
+import PaystackService from "../services/paystack.service";
+import CustomerCreateSchema from "../validators/paystack-customer.validator.create"
+import { checkSubscriptionExpiration } from "../middleware/users.middleware.subscription";
+
 dotenv.config();
 
 
 const router = Router();
 const usersService = new UsersService();
+const permissionsService = new PermissionService();
+const paystackService = new PaystackService();
 
 let baseurl = "https://cloud.ductape.app";
 
@@ -375,4 +388,156 @@ router.get(
     }
   }
 )
+
+router.post('/permissions', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      const { body } = req;
+      await CreatePermissionSchema.validateAsync(body);
+      const permission = await permissionsService.createCustomPermission(body);
+      return res.status(201).json(SUCCESS(permission));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+  }
+})
+
+router.get('/permissions', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      const { query } = req;
+      const { permission } = query;
+      let payload = {};
+      if (permission === permissionType.BASE) {
+          payload = { isBasePermission: true };
+      }
+      const roles = await permissionsService.getAllPermissions(payload);
+      return res.status(200).json(SUCCESS(roles));
+    } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+    }
+});
+
+router.put('/permissions/:id', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { body, params } = req;
+    const { id } = params;
+      await UpdatePermissionSchema.validateAsync(body);
+      const permission = await permissionsService.updateCustomPermission(id, body);
+      return res.status(201).json(SUCCESS(permission));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+  }
+})
+
+router.delete('/permissions/:id', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { params } = req;
+    const { id } = params;
+      const permission = await permissionsService.deleteCustomPermission(id);
+      return res.status(201).json(SUCCESS(permission));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+  }
+})
+
+router.post('/roles', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async(req: Request, res: Response, next: NextFunction) => {
+  try {
+      const { body } = req;
+      await CreateRoleSchema.validateAsync(body);
+      const role = await permissionsService.createRole(body);
+      return res.status(201).json(SUCCESS(role));
+    } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+    }
+});
+
+
+router.get('/roles', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      const roles = await permissionsService.getAllRoles({});
+      return res.status(200).json(SUCCESS(roles));
+    } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+    }
+});
+
+router.put('/roles/:id', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+      const { body, params } = req;
+      const { id } = params;
+      await UpdateRoleSchema.validateAsync(body);
+      const role = await permissionsService.updateRole(id, body);
+      return res.status(201).json(SUCCESS(role));
+    } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+    }
+});
+
+router.delete('/roles/:id', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { params } = req;
+    const { id } = params;
+      const role = await permissionsService.deleteRole(id);
+      return res.status(201).json(SUCCESS(role));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+  }
+})
+
+// PAYSTACK CUSTOMER
+
+router.post('/paystack/customer/:id', validateModuleRequest, async (req, res) => {
+  try {
+      const { body, params } = req;
+      const { id } = params;
+
+      await CustomerCreateSchema.validateAsync(body)
+      const customer = await paystackService.createCustomer({
+          ...body,
+          user_id: id
+      });
+      return res.status(201).json(SUCCESS(customer));
+  } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(400).json(ERROR(error.toString()));
+  }
+});
+
+router.get('/card/', validateUserAccess, async (req, res) => {
+  try {
+    const { user } = req;
+    const { _id: id } = user as users
+      if (!id || typeof id !== 'string') {
+        throw 'Invalid user or user ID';
+      }
+      const customer = await paystackService.getCustomerByUserId(id);
+      return res.status(200).json(SUCCESS(customer));
+  } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(400).json(ERROR(error.toString()));
+  }
+});
+
+router.delete('/card/', validateUserAccess, checkSubscriptionExpiration, async (req, res) => {
+  try {
+      const { user } = req;
+      const { _id: userId } = user as users
+      const deleted = await paystackService.deleteCustomer(userId as unknown as any);
+      return res.status(200).json(SUCCESS({
+          message: 'Card deleted successfully',
+          deleted
+      }));
+  } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(404).json(ERROR(error.toString()));
+  }
+});
+
+
 export default router;
