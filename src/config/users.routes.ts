@@ -16,7 +16,7 @@ import { genericErrors, OauthServices, users } from "../types/users.type";
 import { ObjectId } from "mongoose";
 import { validateModuleRequest } from "../middleware/users.middleware.modules";
 import { validateUserAccess } from "../middleware/users.middleware.access";
-import {encrypt} from "ductape-sdk/dist/processor/utils/processor.utils";
+import { encrypt } from "ductape-sdk/dist/processor/utils/processor.utils";
 import passport from 'passport';
 import '../passports/google.passport';
 import '../passports/github.passport';
@@ -43,7 +43,7 @@ const paystackService = new PaystackService();
 
 let baseurl = "https://cloud.ductape.app";
 
-if(process.env.NODE_ENV!=="development") {
+if (process.env.NODE_ENV !== "development") {
   baseurl = "https://cloud.ductape.app";
 }
 
@@ -57,11 +57,11 @@ router.get(
     const user = req.user as users;
 
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GOOGLE);
-    if(result) {
+    if (result) {
       console.log(process.env.LOGIN_ENC_KEY);
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
       return res.redirect(302, `${baseurl}/auth/login?loggedIn=true&token=${encryptedSessionData}`)
-    }else {
+    } else {
       return res.redirect(302, `${baseurl}/auth/login?loggedIn=false`);
     }
   }
@@ -76,10 +76,10 @@ router.get(
     const user = req.user as users;
 
     const result = await usersService.loginUserAccount(user, {}, OauthServices.GITHUB);
-    if(result) {
+    if (result) {
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
       return res.redirect(302, `${baseurl}/auth/login?loggedIn=true&token=${encryptedSessionData}`)
-    }else {
+    } else {
       return res.redirect(302, `${baseurl}/auth/login?loggedIn=false`);
     }
   }
@@ -97,10 +97,10 @@ router.get(
     const user = req.user as users;
     console.log(user);
     const result = await usersService.loginUserAccount(user, {}, OauthServices.LINKEDIN);
-    if(result) {
+    if (result) {
       const encryptedSessionData = encrypt(JSON.stringify(result), String(process.env.LOGIN_ENC_KEY));
       return res.redirect(302, `${baseurl}/auth/login?loggedIn=true&token=${encryptedSessionData}`)
-    }else {
+    } else {
       return res.redirect(302, `${baseurl}/auth/login?loggedIn=false`);
     }
   }
@@ -391,10 +391,10 @@ router.get(
 
 router.post('/permissions', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
-      const { body } = req;
-      await CreatePermissionSchema.validateAsync(body);
-      const permission = await permissionsService.createCustomPermission(body);
-      return res.status(201).json(SUCCESS(permission));
+    const { body } = req;
+    await CreatePermissionSchema.validateAsync(body);
+    const permission = await permissionsService.createCustomPermission(body);
+    return res.status(201).json(SUCCESS(permission));
   } catch (e) {
     const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error.toString()));
@@ -403,27 +403,27 @@ router.post('/permissions', validateUserAccess, requirePermissions([BasePermissi
 
 router.get('/permissions', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
-      const { query } = req;
-      const { permission } = query;
-      let payload = {};
-      if (permission === permissionType.BASE) {
-          payload = { isBasePermission: true };
-      }
-      const roles = await permissionsService.getAllPermissions(payload);
-      return res.status(200).json(SUCCESS(roles));
-    } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-    return res.status(500).json(ERROR(error.toString()));
+    const { query } = req;
+    const { permission } = query;
+    let payload = {};
+    if (permission === permissionType.BASE) {
+      payload = { isBasePermission: true };
     }
+    const roles = await permissionsService.getAllPermissions(payload);
+    return res.status(200).json(SUCCESS(roles));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+  }
 });
 
 router.put('/permissions/:id', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { body, params } = req;
     const { id } = params;
-      await UpdatePermissionSchema.validateAsync(body);
-      const permission = await permissionsService.updateCustomPermission(id, body);
-      return res.status(201).json(SUCCESS(permission));
+    await UpdatePermissionSchema.validateAsync(body);
+    const permission = await permissionsService.updateCustomPermission(id, body);
+    return res.status(201).json(SUCCESS(permission));
   } catch (e) {
     const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error.toString()));
@@ -434,56 +434,68 @@ router.delete('/permissions/:id', validateUserAccess, requirePermissions([BasePe
   try {
     const { params } = req;
     const { id } = params;
-      const permission = await permissionsService.deleteCustomPermission(id);
-      return res.status(201).json(SUCCESS(permission));
+    const permission = await permissionsService.deleteCustomPermission(id);
+    return res.status(201).json(SUCCESS(permission));
   } catch (e) {
     const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error.toString()));
   }
 })
 
-router.post('/roles', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async(req: Request, res: Response, next: NextFunction) => {
+router.post('/roles', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
-      const { body } = req;
-      await CreateRoleSchema.validateAsync(body);
-      const role = await permissionsService.createRole(body);
-      return res.status(201).json(SUCCESS(role));
-    } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
+    const { body } = req;
+    await CreateRoleSchema.validateAsync(body);
+    const role = await permissionsService.createRole(body);
+    return res.status(201).json(SUCCESS(role));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error.toString()));
-    }
+  }
 });
 
 
 router.get('/roles', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
-      const roles = await permissionsService.getAllRoles({});
-      return res.status(200).json(SUCCESS(roles));
-    } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
+    const roles = await permissionsService.getAllRoles({});
+    return res.status(200).json(SUCCESS(roles));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error.toString()));
-    }
+  }
+});
+
+router.get('/roles/:id', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { params } = req;
+    const { id } = params;
+    const role = await permissionsService.getRolebyId(id as unknown as ObjectId);
+    return res.status(201).json(SUCCESS(role));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(500).json(ERROR(error.toString()));
+  }
 });
 
 router.put('/roles/:id', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
-      const { body, params } = req;
-      const { id } = params;
-      await UpdateRoleSchema.validateAsync(body);
-      const role = await permissionsService.updateRole(id, body);
-      return res.status(201).json(SUCCESS(role));
-    } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
+    const { body, params } = req;
+    const { id } = params;
+    await UpdateRoleSchema.validateAsync(body);
+    const role = await permissionsService.updateRole(id, body);
+    return res.status(201).json(SUCCESS(role));
+  } catch (e) {
+    const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error.toString()));
-    }
+  }
 });
 
 router.delete('/roles/:id', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { params } = req;
     const { id } = params;
-      const role = await permissionsService.deleteRole(id);
-      return res.status(201).json(SUCCESS(role));
+    const role = await permissionsService.deleteRole(id);
+    return res.status(201).json(SUCCESS(role));
   } catch (e) {
     const error = extractError(e as unknown as genericErrors);
     return res.status(500).json(ERROR(error.toString()));
@@ -494,18 +506,18 @@ router.delete('/roles/:id', validateUserAccess, requirePermissions([BasePermissi
 
 router.post('/paystack/customer/:id', validateModuleRequest, async (req, res) => {
   try {
-      const { body, params } = req;
-      const { id } = params;
+    const { body, params } = req;
+    const { id } = params;
 
-      await CustomerCreateSchema.validateAsync(body)
-      const customer = await paystackService.createCustomer({
-          ...body,
-          user_id: id
-      });
-      return res.status(201).json(SUCCESS(customer));
+    await CustomerCreateSchema.validateAsync(body)
+    const customer = await paystackService.createCustomer({
+      ...body,
+      user_id: id
+    });
+    return res.status(201).json(SUCCESS(customer));
   } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(400).json(ERROR(error.toString()));
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(400).json(ERROR(error.toString()));
   }
 });
 
@@ -513,29 +525,29 @@ router.get('/card/', validateUserAccess, async (req, res) => {
   try {
     const { user } = req;
     const { _id: id } = user as users
-      if (!id || typeof id !== 'string') {
-        throw 'Invalid user or user ID';
-      }
-      const customer = await paystackService.getCustomerByUserId(id);
-      return res.status(200).json(SUCCESS(customer));
+    if (!id || typeof id !== 'string') {
+      throw 'Invalid user or user ID';
+    }
+    const customer = await paystackService.getCustomerByUserId(id);
+    return res.status(200).json(SUCCESS(customer));
   } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(400).json(ERROR(error.toString()));
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(400).json(ERROR(error.toString()));
   }
 });
 
 router.delete('/card/', validateUserAccess, checkSubscriptionExpiration, async (req, res) => {
   try {
-      const { user } = req;
-      const { _id: userId } = user as users
-      const deleted = await paystackService.deleteCustomer(userId as unknown as any);
-      return res.status(200).json(SUCCESS({
-          message: 'Card deleted successfully',
-          deleted
-      }));
+    const { user } = req;
+    const { _id: userId } = user as users
+    const deleted = await paystackService.deleteCustomer(userId as unknown as any);
+    return res.status(200).json(SUCCESS({
+      message: 'Card deleted successfully',
+      deleted
+    }));
   } catch (e) {
-      const error = extractError(e as unknown as genericErrors);
-      return res.status(404).json(ERROR(error.toString()));
+    const error = extractError(e as unknown as genericErrors);
+    return res.status(404).json(ERROR(error.toString()));
   }
 });
 
