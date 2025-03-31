@@ -1,6 +1,7 @@
 import { IPermissionsRepo, PermissionsRepo } from '../repo/permissions.repo';
 import { IPermission, BasePermissions, IRole } from '../types/permission.type';
 import { IRolesRepo, RolesRepo } from '../repo/roles.repo';
+import { ObjectId } from 'mongoose';
 
 export interface IPermissionService {
   getAllPermissions(query: Partial<IPermission>): Promise<Array<IPermission>>;
@@ -72,6 +73,10 @@ export default class PermissionService implements IPermissionService {
 
   async getAllRoles(query: Partial<IRole>): Promise<Array<IRole>> {
     return await this.rolesRepo.find(query);
+  }
+
+  async getRolebyId(id: ObjectId): Promise<IRole>{
+    return await this.rolesRepo.fetchById(id);
   }
 
   async createRole(roleData: Partial<IRole>) {
