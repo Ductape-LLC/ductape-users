@@ -1,7 +1,8 @@
-import { deleteOne } from '../utils/paystack.delete.delete';
+import { deleteOne } from '../utils/paystack.utils.delete';
 import { handleError } from '../errors/errors';
 import { PaystackCustomer } from '../types/paystack.type';
 import { create } from '../utils/paystack.utils.create';
+import { updateUser } from '../utils/paystack.utils.update';
 import { findOne, find } from '../utils/paystack.utils.read';
 
 export interface IPaystackRepo {
@@ -10,6 +11,7 @@ export interface IPaystackRepo {
   findByCustomerCode(code: string): Promise<PaystackCustomer>;
   findByEmail(email: string): Promise<PaystackCustomer>;
   deleteCustomer(userId: string): Promise<boolean>;
+  update(id: string, payload: Partial<PaystackCustomer>): Promise<PaystackCustomer>;
 }
 
 export const PaystackRepo: IPaystackRepo = {
@@ -17,6 +19,19 @@ export const PaystackRepo: IPaystackRepo = {
     try {
       return await create(payload);
     } catch (e) {
+      throw handleError(e);
+    }
+  },
+
+  async update(id: string, payload: Partial<PaystackCustomer>): Promise<PaystackCustomer> {
+    try {
+      const update = await findOne({ _id: id });
+      if (!update) {
+        throw 'Paystack customer not found';
+      }
+      return await updateUser(id, payload);
+    }
+    catch (e) {
       throw handleError(e);
     }
   },

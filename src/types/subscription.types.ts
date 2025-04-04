@@ -3,7 +3,7 @@ import mongoose, { Document } from "mongoose";
 export enum SubscriptionStatus {
   ACTIVE = 'active',
   CANCELLED = 'cancelled',
-  EXPIRED = 'EXPIRED',
+  EXPIRED = 'expired',
   PAST_DUE = 'overdue',
 }
 
