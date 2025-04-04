@@ -32,6 +32,8 @@ import { requirePermissions } from "../middleware/users.middleware.permissions";
 import PaystackService from "../services/paystack.service";
 import CustomerCreateSchema from "../validators/paystack-customer.validator.create"
 import { checkSubscriptionExpiration } from "../middleware/users.middleware.subscription";
+import BillingInfoCreateSchema from "../validators/billing.validator.create";
+import BillingInfoUpdateService from "../validators/billing.validator.update";
 
 dotenv.config();
 
@@ -520,6 +522,42 @@ router.post('/paystack/customer/:id', validateModuleRequest, async (req, res) =>
     return res.status(400).json(ERROR(error.toString()));
   }
 });
+
+router.get(
+  "/billing-info",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { user } = req;
+      const { _id } = user as any;
+      console.log("ID", _id)
+      const result = await paystackService.fetchBillingInfo(_id);
+      return res.status(201).json(SUCCESS(result));
+    } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(400).json(ERROR(error.toString()));
+    }
+  }
+);
+
+router.post(
+  "/billing-info",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { body, user } = req;
+      const { _id } = user as any;
+
+      await BillingInfoCreateSchema.validateAsync(body);
+      
+      const result = await paystackService.createBillingInfo(body, _id);
+      return res.status(201).json(SUCCESS(result));
+    } catch (e) {
+      const error = extractError(e as unknown as genericErrors);
+      return res.status(400).json(ERROR(error.toString()));
+    }
+  }
+);
 
 router.get('/card/', validateUserAccess, async (req, res) => {
   try {

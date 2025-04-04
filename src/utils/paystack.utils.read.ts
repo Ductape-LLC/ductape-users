@@ -9,6 +9,7 @@ export const findOne = async(query: any): Promise<PaystackCustomer | null> => {
                 user_id: 1,
                 customer_code: 1,
                 email: 1,
+                billingInformation: 1,
                 authorization: {
                     last4: 1,
                     exp_month: 1,
