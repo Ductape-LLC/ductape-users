@@ -391,6 +391,18 @@ router.get(
   }
 )
 
+router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { params } = req;
+    const { id } = params;
+    const result = await usersService.findByUserId(id);
+    return res.status(200).json(SUCCESS(result));
+  } catch (e) {
+    if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
+    next(e);
+  }
+})
+
 router.post('/permissions', validateUserAccess, requirePermissions([BasePermissions.MANAGE_SYSTEM]), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { body } = req;
