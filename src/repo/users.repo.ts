@@ -133,7 +133,7 @@ export const UsersRepo: IUsersRepo = {
             if (!oauth_service && (!email || !raw)) {
                 throw new UserError("Email and password are required", 400);
             }
-            
+
             let match: { email: string | undefined, password?: string } = { email };
             const userData = await fetchUser([{
                 $match: match
