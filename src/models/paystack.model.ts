@@ -13,7 +13,7 @@ const schema = new mongoose.Schema<PaystackCustomer>(
     customer_code: {
       type: String,
       required: false,
-      unique: true,
+      unique: false,
     },
     email: {
       type: String,

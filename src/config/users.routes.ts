@@ -536,7 +536,7 @@ router.post('/paystack/customer/:id', validateModuleRequest, async (req, res) =>
 });
 
 router.get(
-  "/billing-info",
+  "/billing/info",
   validateUserAccess,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -553,7 +553,7 @@ router.get(
 );
 
 router.post(
-  "/billing-info",
+  "/billing/info",
   validateUserAccess,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
