@@ -33,7 +33,7 @@ passport.use(
           githubId: id,
           firstname: username || '',
           lastname: '',
-          email: email || `${username}@gmail.com`,
+          email: email || `${username?.toLowerCase()}@gmail.com`,
           password: `${email}${id}`,
         };
         const user = await usersService.createUserAccount(body);
