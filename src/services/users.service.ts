@@ -11,6 +11,7 @@ import { IOTPRepo, OTPRepo } from '../repo/otp.repo';
 import sha256 from 'crypto-js/sha256';
 import { handleError, NotFoundError } from '../errors/errors';
 import { comparePasswords, hashPassword } from '../utils/users.utils.string';
+import { AcccessRepo, IAccessRepo } from '../repo/access.repo';
 
 export interface IUsersService {
   createUserAccount(payload: users): Promise<users>;
@@ -25,6 +26,7 @@ export default class UsersService implements IUsersService {
   ConfirmRepo: IConfirmRepo;
   ForgotRepo: IForgotRepo;
   OTPRepo: IOTPRepo;
+  AccessRepo: IAccessRepo;
 
   constructor() {
     this.UserRepo = UsersRepo;
@@ -32,12 +34,13 @@ export default class UsersService implements IUsersService {
     this.ConfirmRepo = ConfirmRepo;
     this.ForgotRepo = ForgotRepo;
     this.OTPRepo = OTPRepo;
+    this.AccessRepo = AcccessRepo
   }
 
   async createUserAccount(payload: Partial<users>): Promise<users> {
-    let user = await this.UserRepo.getTemporaryUser(payload.email as string)
+    let user = await this.UserRepo.getTemporaryUser(payload.email as string);
     if (user && user.status === UserStatus.TEMPORARY) {
-      user = await this.UserRepo.updateTemporaryUser(user._id, payload)
+      user = await this.UserRepo.updateTemporaryUser(user._id, payload);
     } else {
       user = await this.UserRepo.create(payload as users);
     }
@@ -45,32 +48,35 @@ export default class UsersService implements IUsersService {
     const { _id: confirm_id, token } = confirm;
     const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('2m')}`;
     EVENTBROKER({ event: EventType.CONFIRM_EMAIL, data: { user, token, confirm_id, auth } });
-    return user
+    return user;
   }
 
   async updateUserAccount(payload: users, id: string): Promise<users> {
-    let user = await this.findByUserId(id)
-    if (!user) throw new NotFoundError('user')
+    let user = await this.findByUserId(id);
+    if (!user) throw new NotFoundError('user');
 
     const result = await this.UserRepo.updateOne(id, payload);
-    user = await this.findByUserId(id)
-    return user
+    user = await this.findByUserId(id);
+    return user;
   }
 
   async createTemporary(payload: users): Promise<users> {
-    const _user = await this.UserRepo.fetchTempUser(payload)
-    if (_user) return _user
+    const _user = await this.UserRepo.fetchTempUser(payload);
+    if (_user) return _user;
     const user = await this.UserRepo.createTemporaryUser(payload);
     return user;
   }
 
-  async loginUserAccount(payload: Partial<users>, query: { private_key?: boolean }, oauth_service?: OauthServices): Promise<users> {
+  async loginUserAccount(
+    payload: Partial<users>,
+    query: { private_key?: boolean },
+    oauth_service?: OauthServices,
+  ): Promise<users> {
     try {
-
       if (oauth_service) {
         Object.assign(payload, {
-          oauth_service
-        })
+          oauth_service,
+        });
       }
 
       const userData = await this.UserRepo.login(payload);
@@ -161,7 +167,37 @@ export default class UsersService implements IUsersService {
     }
   }
 
-  async regenerateLoginOTP(user_id: ObjectId): Promise<{}> {
+  async validateOTP(token: string, user_id: ObjectId): Promise<any> {
+    try {
+      const user = await this.UserRepo.fetchByIdReturnPrivateKey(user_id);
+
+      const { private_key } = user;
+
+      if (user) {
+
+        const valid = await this.OTPRepo.fetchByUser({ token, user_id });
+
+        if (!valid) throw 'Invalid OTP';
+        const { expiry, _id: otp_id, status } = valid;
+
+        if (new Date(expiry) < new Date() || status) throw 'OTP has expired';
+
+        const auth_token = await this.AuthRepo.generateUserAuthJWT(user, private_key as string, '100y');
+
+        await this.OTPRepo.updateOne(otp_id, { status: true });
+        const workspace_access = await this.AccessRepo.findOne({user_id, default: true, });
+        delete user.private_key;
+        return { user_id, private_key, auth_token, workspace_id: workspace_access?.workspace_id };
+
+      } else {
+        throw '2FA not enabled';
+      }
+    } catch (e) {
+      throw handleError(e);
+    }
+  }
+
+  async generateOTP(user_id: ObjectId, type: string): Promise<{}> {
     try {
       const user = await this.UserRepo.fetchById(user_id);
 
@@ -170,10 +206,10 @@ export default class UsersService implements IUsersService {
       const auth = `Bearer ${await this.AuthRepo.generateModuleAuthJWT('2m')}`;
       const otp = await this.OTPRepo.create(user);
       const { _id: otp_id, token } = otp;
-      EVENTBROKER({ event: EventType.SEND_OTP, data: { user, token, otp_id, auth } });
+      EVENTBROKER({ event: EventType.SEND_OTP, data: { user, token, otp_id, auth, type } });
 
       return {
-        message: "OTP successfully sent"
+        message: 'OTP successfully sent',
       };
     } catch (e) {
       throw handleError(e);
@@ -228,7 +264,7 @@ export default class UsersService implements IUsersService {
       EVENTBROKER({ event: EventType.FORGOT_EMAIL, data: { user, token, forgot_id: _id, auth } });
 
       return {
-        message: "An OTP has been sent to your mail to reset your password"
+        message: 'An OTP has been sent to your mail to reset your password',
       };
     } catch (e) {
       throw handleError(e);
@@ -270,12 +306,12 @@ export default class UsersService implements IUsersService {
     if (!user) throw 'Email does not exist';
 
     const isPasswordValid = await comparePasswords(oldPassword, user.password as string);
-    if (!isPasswordValid) throw 'Current password is incorrect'
+    if (!isPasswordValid) throw 'Current password is incorrect';
 
     await this.UserRepo.updateOne(user._id, { password: await hashPassword(newPassword) });
 
     return {
-      message: "Password successfully changed"
+      message: 'Password successfully changed',
     };
   }
 
@@ -285,12 +321,12 @@ export default class UsersService implements IUsersService {
       console.log(data);
       const { public_key: p_key, private_key } = data;
       if (p_key !== public_key) {
-        console.log(p_key, public_key, private_key)
+        console.log(p_key, public_key, private_key);
         throw 'Invalid key access';
       }
       return await this.AuthRepo.validateUserAuthJWT(token, private_key as string);
     } catch (e) {
-      console.log(e)
+      console.log(e);
       throw handleError(e);
     }
   }
