@@ -11,4 +11,4 @@ const schema = new mongoose.Schema<otpUser>({
     user_id: {type: mongoose.Schema.Types.ObjectId, ref: "Users"}
 })
 
-export const model = mongoose.model('login_otps', schema);
+export const model = mongoose.model('otps', schema);

@@ -14,4 +14,4 @@ export interface confirmUserEmailEvent { user: users; confirm_id: ObjectId; toke
 
 export interface forgotUserEmailEvent { user: users; forgot_id: ObjectId; token: string; auth: string }
 
-export interface sendOTPEmailEvent { user: users; otp_id: ObjectId; token: string; auth: string}
+export interface sendOTPEmailEvent { user: users; otp_id: ObjectId; token: string; auth: string, type: string }

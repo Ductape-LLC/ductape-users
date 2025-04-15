@@ -9,6 +9,7 @@ import ChangePasswordSchema from "../validators/users.validator.changepassword";
 import changePasswordSchema from "../validators/users.validator.change-password";
 import LoginSchema from "../validators/users.validator.login";
 import OTPLoginSchema from "../validators/users.validator.otplogin";
+import OTPSchema from "../validators/users.validator.otp";
 import AuthKeyLoginSchema from "../validators/users.validator.authkeylogin";
 import ForgotSchema from "../validators/users.validators.forgotpassword";
 import { extractError, stripAuth } from "../utils/users.utils.string";
@@ -34,6 +35,7 @@ import CustomerCreateSchema from "../validators/paystack-customer.validator.crea
 import { checkSubscriptionExpiration } from "../middleware/users.middleware.subscription";
 import BillingInfoCreateSchema from "../validators/billing.validator.create";
 import BillingInfoUpdateService from "../validators/billing.validator.update";
+import { OTP_TYPES } from "../types/otp.type";
 
 dotenv.config();
 
@@ -281,7 +283,7 @@ router.post(
       const { params } = req;
       const { user_id } = params;
 
-      const result = await usersService.regenerateLoginOTP(user_id as unknown as ObjectId);
+      const result = await usersService.generateOTP(user_id as unknown as ObjectId, OTP_TYPES.LOGIN);
       return res.status(201).json(SUCCESS(result));
 
     } catch (e) {
@@ -346,6 +348,50 @@ router.get(
       }
 
     } catch (e) {
+      next(e);
+    }
+  }
+)
+
+router.get(
+  "/generate/2fa-otp",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+      const { user } = req;
+      const { _id } = user as users
+
+      const result = await usersService.generateOTP(_id as unknown as ObjectId, OTP_TYPES.TWO_FACTOR_AUTHENTICATION);
+      return res.status(201).json(SUCCESS(result));
+
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("ERRRORRRRRR!!!!", e);
+      next(e);
+    }
+  }
+)
+
+router.post(
+  "/validate/otp",
+  validateUserAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+      const { body } = req;
+
+      await OTPSchema.validateAsync(body);
+
+      const { user } = req;
+      const { _id } = user as users
+      const { token } = body;
+
+      const result = await usersService.validateOTP(token, _id as unknown as ObjectId);
+
+      return res.status(201).json(SUCCESS(result));
+
+    } catch (e) {
+      if (process.env.NODE_ENV !== "production") console.log("EERRRROOORRR!!!!", e);
       next(e);
     }
   }

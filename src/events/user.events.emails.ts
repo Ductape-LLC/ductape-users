@@ -30,11 +30,11 @@ export const sendForgotEmail = async (payload: forgotUserEmailEvent) => {
 export const sendOTPEmail = async (payload: sendOTPEmailEvent) => {
     try {
 
-        const {user, otp_id, token, auth} = payload;
+        const {user, otp_id, token, auth, type} = payload;
 
         const {firstname, lastname,email, public_key} = user;
 
-        return await emailClient(auth).post(SEND_OTP_EMAIL, {firstname, lastname, email, otp_id, token});
+        return await emailClient(auth).post(SEND_OTP_EMAIL, {firstname, lastname, email, otp_id, token, type});
 
     } catch(e) {
         if(process.env.NODE_ENV !== "production") console.log(e);
