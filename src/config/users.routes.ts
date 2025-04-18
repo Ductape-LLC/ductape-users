@@ -47,7 +47,7 @@ const paystackService = new PaystackService();
 
 let baseurl = "https://cloud.ductape.app";
 
-if (process.env.NODE_ENV !== "development") {
+if (process.env.NODE_ENV !== "staging") {
   baseurl = "https://cloud.ductape.app";
 }
 
