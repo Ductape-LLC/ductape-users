@@ -45,7 +45,7 @@ const usersService = new UsersService();
 const permissionsService = new PermissionService();
 const paystackService = new PaystackService();
 
-let baseurl = "https://cloud.ductape.app";
+let baseurl = "https://sandbox.ductape.app";
 
 if (process.env.NODE_ENV !== "staging") {
   baseurl = "https://cloud.ductape.app";
